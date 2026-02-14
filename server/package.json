@@ -1,0 +1,26 @@
+{
+    "name": "synthesizer-server",
+    "version": "1.0.0",
+    "main": "index.js",
+    "scripts": {
+        "dev": "concurrently \"node ./node_modules/typescript/bin/tsc -w -p tsconfig.json\" \"node ./node_modules/typescript/bin/tsc -w -p tsconfig.client.json\" \"nodemon dist/index.js\"",
+        "build": "node ./node_modules/typescript/bin/tsc -p tsconfig.json",
+        "start": "node dist/index.js"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "description": "",
+    "dependencies": {
+        "express": "^5.2.1",
+        "typescript": "^5.9.3",
+        "ws": "^8.19.0"
+    },
+    "devDependencies": {
+        "@types/express": "^5.0.6",
+        "@types/ws": "^8.18.1",
+        "concurrently": "^9.2.1",
+        "nodemon": "^3.1.11",
+        "tsc": "^2.0.4"
+    }
+}

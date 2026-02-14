@@ -1,433 +1,443 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Synthesizer</title>
-<link rel="stylesheet" href="synth.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Synthesizer</title>
+    <link rel="stylesheet" href="synth.css">
 </head>
+
 <body>
 
-<div id="synth">
-  <div class="synth-header">
-    <span class="synth-logo">Dual Osc Synth</span>
-  </div>
-
-  <div class="main-tabs">
-    <div class="main-tab active" data-page="osc">Osc</div>
-    <div class="main-tab" data-page="fx">FX</div>
-  </div>
-
-  <!-- ═══ OSC PAGE ═══ -->
-  <div class="main-page active" id="page-osc">
-    <div class="synth-body">
-      <canvas id="waveform-canvas" width="696" height="80"></canvas>
-
-      <div class="osc-tabs">
-        <div class="osc-tab active" data-osc="1">
-          <span class="osc-tab-label">Osc 1</span>
-          <button class="osc-toggle on" id="toggle1">ON</button>
+    <div id="synth">
+        <div class="synth-header">
+            <span class="synth-logo">Dual Osc Synth</span>
         </div>
-        <div class="osc-tab" data-osc="2">
-          <span class="osc-tab-label">Osc 2</span>
-          <button class="osc-toggle on" id="toggle2">ON</button>
-        </div>
-      </div>
 
-      <div class="osc-section" id="osc1-section">
-        <div class="osc-content">
-          <div class="controls">
-            <div class="control-group">
-              <label>Waveform</label>
-              <select id="waveform1">
-                <option value="sine">Sine</option>
-                <option value="triangle">Triangle</option>
-                <option value="sawtooth" selected>Sawtooth</option>
-                <option value="square">Square</option>
-              </select>
-              <canvas class="waveform-preview" id="waveform1-preview" width="120" height="30"></canvas>
-            </div>
-            <div class="control-group">
-              <label>Volume</label>
-              <input type="range" id="volume1" min="0" max="1" step="0.01" value="0.5">
-              <div class="value-display" id="volume1-val">0.50</div>
-            </div>
-            <div class="control-group">
-              <label>Detune (cents)</label>
-              <canvas class="knob-canvas" id="detune1-knob" width="48" height="56"></canvas>
-              <input type="hidden" id="detune1" value="0">
-              <div class="value-display" id="detune1-val">0</div>
-            </div>
-          </div>
-          <div class="controls">
-            <div class="control-group">
-              <label>Unison Voices</label>
-              <input type="range" id="unison-count1" min="1" max="8" step="1" value="1">
-              <div class="value-display" id="unison-count1-val">1</div>
-            </div>
-            <div class="control-group">
-              <label>Unison Detune</label>
-              <input type="range" id="unison-detune1" min="0" max="100" step="1" value="20">
-              <div class="value-display" id="unison-detune1-val">20</div>
-            </div>
-            <div class="control-group">
-              <label>Stereo Spread</label>
-              <input type="range" id="unison-spread1" min="0" max="100" step="1" value="50">
-              <div class="value-display" id="unison-spread1-val">50%</div>
-            </div>
-          </div>
-          <div class="lfo-section" id="lfo-section-1"></div>
-          <div class="filter-section" id="filter1-section" data-drop-target="filter" data-osc="1">
-            <div class="controls">
-              <div class="control-group">
-                <label>Filter</label>
-                <div class="filter-header">
-                  <select id="filter-type1">
-                    <option value="lowpass" selected>Low Pass</option>
-                    <option value="highpass">High Pass</option>
-                    <option value="bandpass">Band Pass</option>
-                  </select>
-                  <button class="filter-toggle on" id="filter-toggle1">ON</button>
+        <div class="main-tabs">
+            <div class="main-tab active" data-page="osc">Osc</div>
+            <div class="main-tab" data-page="fx">FX</div>
+        </div>
+
+        <!-- ═══ OSC PAGE ═══ -->
+        <div class="main-page active" id="page-osc">
+            <div class="synth-body">
+                <canvas id="waveform-canvas" width="696" height="80"></canvas>
+
+                <div class="osc-tabs">
+                    <div class="osc-tab active" data-osc="1">
+                        <span class="osc-tab-label">Osc 1</span>
+                        <button class="osc-toggle on" id="toggle1">ON</button>
+                    </div>
+                    <div class="osc-tab" data-osc="2">
+                        <span class="osc-tab-label">Osc 2</span>
+                        <button class="osc-toggle on" id="toggle2">ON</button>
+                    </div>
                 </div>
-              </div>
-            </div>
-            <canvas class="filter-canvas" id="filter1-canvas" width="560" height="120"></canvas>
-            <div class="filter-values" id="filter1-values"></div>
-          </div>
-          <canvas class="adsr-canvas" id="adsr1-canvas" width="560" height="120"></canvas>
-          <div class="adsr-values" id="adsr1-values"></div>
-        </div>
-      </div>
 
-      <div class="osc-section hidden" id="osc2-section">
-        <div class="osc-content">
-          <div class="controls">
-            <div class="control-group">
-              <label>Waveform</label>
-              <select id="waveform2">
-                <option value="sine">Sine</option>
-                <option value="triangle" selected>Triangle</option>
-                <option value="sawtooth">Sawtooth</option>
-                <option value="square">Square</option>
-              </select>
-              <canvas class="waveform-preview" id="waveform2-preview" width="120" height="30"></canvas>
-            </div>
-            <div class="control-group">
-              <label>Volume</label>
-              <input type="range" id="volume2" min="0" max="1" step="0.01" value="0.5">
-              <div class="value-display" id="volume2-val">0.50</div>
-            </div>
-            <div class="control-group">
-              <label>Detune (cents)</label>
-              <canvas class="knob-canvas" id="detune2-knob" width="48" height="56"></canvas>
-              <input type="hidden" id="detune2" value="0">
-              <div class="value-display" id="detune2-val">0</div>
-            </div>
-          </div>
-          <div class="controls">
-            <div class="control-group">
-              <label>Unison Voices</label>
-              <input type="range" id="unison-count2" min="1" max="8" step="1" value="1">
-              <div class="value-display" id="unison-count2-val">1</div>
-            </div>
-            <div class="control-group">
-              <label>Unison Detune</label>
-              <input type="range" id="unison-detune2" min="0" max="100" step="1" value="20">
-              <div class="value-display" id="unison-detune2-val">20</div>
-            </div>
-            <div class="control-group">
-              <label>Stereo Spread</label>
-              <input type="range" id="unison-spread2" min="0" max="100" step="1" value="50">
-              <div class="value-display" id="unison-spread2-val">50%</div>
-            </div>
-          </div>
-          <div class="lfo-section" id="lfo-section-2"></div>
-          <div class="filter-section" id="filter2-section" data-drop-target="filter" data-osc="2">
-            <div class="controls">
-              <div class="control-group">
-                <label>Filter</label>
-                <div class="filter-header">
-                  <select id="filter-type2">
-                    <option value="lowpass" selected>Low Pass</option>
-                    <option value="highpass">High Pass</option>
-                    <option value="bandpass">Band Pass</option>
-                  </select>
-                  <button class="filter-toggle on" id="filter-toggle2">ON</button>
+                <div class="osc-section" id="osc1-section">
+                    <div class="osc-content">
+                        <div class="controls">
+                            <div class="control-group">
+                                <label>Waveform</label>
+                                <select id="waveform1">
+                                    <option value="sine">Sine</option>
+                                    <option value="triangle">Triangle</option>
+                                    <option value="sawtooth" selected>Sawtooth</option>
+                                    <option value="square">Square</option>
+                                </select>
+                                <canvas class="waveform-preview" id="waveform1-preview" width="120"
+                                    height="30"></canvas>
+                            </div>
+                            <div class="control-group">
+                                <label>Volume</label>
+                                <input type="range" id="volume1" min="0" max="1" step="0.01" value="0.5">
+                                <div class="value-display" id="volume1-val">0.50</div>
+                            </div>
+                            <div class="control-group">
+                                <label>Detune (cents)</label>
+                                <canvas class="knob-canvas" id="detune1-knob" width="48" height="56"></canvas>
+                                <input type="hidden" id="detune1" value="0">
+                                <div class="value-display" id="detune1-val">0</div>
+                            </div>
+                        </div>
+                        <div class="controls">
+                            <div class="control-group">
+                                <label>Unison Voices</label>
+                                <input type="range" id="unison-count1" min="1" max="8" step="1" value="1">
+                                <div class="value-display" id="unison-count1-val">1</div>
+                            </div>
+                            <div class="control-group">
+                                <label>Unison Detune</label>
+                                <input type="range" id="unison-detune1" min="0" max="100" step="1" value="20">
+                                <div class="value-display" id="unison-detune1-val">20</div>
+                            </div>
+                            <div class="control-group">
+                                <label>Stereo Spread</label>
+                                <input type="range" id="unison-spread1" min="0" max="100" step="1" value="50">
+                                <div class="value-display" id="unison-spread1-val">50%</div>
+                            </div>
+                        </div>
+                        <div class="lfo-section" id="lfo-section-1"></div>
+                        <div class="filter-section" id="filter1-section" data-drop-target="filter" data-osc="1">
+                            <div class="controls">
+                                <div class="control-group">
+                                    <label>Filter</label>
+                                    <div class="filter-header">
+                                        <select id="filter-type1">
+                                            <option value="lowpass" selected>Low Pass</option>
+                                            <option value="highpass">High Pass</option>
+                                            <option value="bandpass">Band Pass</option>
+                                        </select>
+                                        <button class="filter-toggle on" id="filter-toggle1">ON</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <canvas class="filter-canvas" id="filter1-canvas" width="560" height="120"></canvas>
+                            <div class="filter-values" id="filter1-values"></div>
+                        </div>
+                        <canvas class="adsr-canvas" id="adsr1-canvas" width="560" height="120"></canvas>
+                        <div class="adsr-values" id="adsr1-values"></div>
+                    </div>
                 </div>
-              </div>
-            </div>
-            <canvas class="filter-canvas" id="filter2-canvas" width="560" height="120"></canvas>
-            <div class="filter-values" id="filter2-values"></div>
-          </div>
-          <canvas class="adsr-canvas" id="adsr2-canvas" width="560" height="120"></canvas>
-          <div class="adsr-values" id="adsr2-values"></div>
-        </div>
-      </div>
 
-      <div class="controls master-controls" id="master-volume-section" data-drop-target="volume">
-        <div class="control-group">
-          <label>Master Volume</label>
-          <input type="range" id="master-volume" min="0" max="1" step="0.01" value="0.7">
-          <div class="value-display" id="master-volume-val">0.70</div>
+                <div class="osc-section hidden" id="osc2-section">
+                    <div class="osc-content">
+                        <div class="controls">
+                            <div class="control-group">
+                                <label>Waveform</label>
+                                <select id="waveform2">
+                                    <option value="sine">Sine</option>
+                                    <option value="triangle" selected>Triangle</option>
+                                    <option value="sawtooth">Sawtooth</option>
+                                    <option value="square">Square</option>
+                                </select>
+                                <canvas class="waveform-preview" id="waveform2-preview" width="120"
+                                    height="30"></canvas>
+                            </div>
+                            <div class="control-group">
+                                <label>Volume</label>
+                                <input type="range" id="volume2" min="0" max="1" step="0.01" value="0.5">
+                                <div class="value-display" id="volume2-val">0.50</div>
+                            </div>
+                            <div class="control-group">
+                                <label>Detune (cents)</label>
+                                <canvas class="knob-canvas" id="detune2-knob" width="48" height="56"></canvas>
+                                <input type="hidden" id="detune2" value="0">
+                                <div class="value-display" id="detune2-val">0</div>
+                            </div>
+                        </div>
+                        <div class="controls">
+                            <div class="control-group">
+                                <label>Unison Voices</label>
+                                <input type="range" id="unison-count2" min="1" max="8" step="1" value="1">
+                                <div class="value-display" id="unison-count2-val">1</div>
+                            </div>
+                            <div class="control-group">
+                                <label>Unison Detune</label>
+                                <input type="range" id="unison-detune2" min="0" max="100" step="1" value="20">
+                                <div class="value-display" id="unison-detune2-val">20</div>
+                            </div>
+                            <div class="control-group">
+                                <label>Stereo Spread</label>
+                                <input type="range" id="unison-spread2" min="0" max="100" step="1" value="50">
+                                <div class="value-display" id="unison-spread2-val">50%</div>
+                            </div>
+                        </div>
+                        <div class="lfo-section" id="lfo-section-2"></div>
+                        <div class="filter-section" id="filter2-section" data-drop-target="filter" data-osc="2">
+                            <div class="controls">
+                                <div class="control-group">
+                                    <label>Filter</label>
+                                    <div class="filter-header">
+                                        <select id="filter-type2">
+                                            <option value="lowpass" selected>Low Pass</option>
+                                            <option value="highpass">High Pass</option>
+                                            <option value="bandpass">Band Pass</option>
+                                        </select>
+                                        <button class="filter-toggle on" id="filter-toggle2">ON</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <canvas class="filter-canvas" id="filter2-canvas" width="560" height="120"></canvas>
+                            <div class="filter-values" id="filter2-values"></div>
+                        </div>
+                        <canvas class="adsr-canvas" id="adsr2-canvas" width="560" height="120"></canvas>
+                        <div class="adsr-values" id="adsr2-values"></div>
+                    </div>
+                </div>
+
+                <div class="controls master-controls" id="master-volume-section" data-drop-target="volume">
+                    <div class="control-group">
+                        <label>Master Volume</label>
+                        <input type="range" id="master-volume" min="0" max="1" step="0.01" value="0.7">
+                        <div class="value-display" id="master-volume-val">0.70</div>
+                    </div>
+                </div>
+            </div>
         </div>
-      </div>
+
+        <!-- ═══ FX PAGE ═══ -->
+        <div class="main-page" id="page-fx">
+            <div class="synth-body">
+
+                <!-- Saturation -->
+                <div class="fx-unit" id="fx-saturation">
+                    <div class="fx-unit-header">
+                        <span class="fx-unit-label">Saturation</span>
+                        <button class="fx-toggle off" id="fx-saturation-toggle">OFF</button>
+                    </div>
+                    <div class="fx-unit-body">
+                        <div class="controls">
+                            <div class="control-group">
+                                <label>Type</label>
+                                <select id="fx-sat-type">
+                                    <option value="soft" selected>Soft</option>
+                                    <option value="hard">Hard</option>
+                                    <option value="wave">Wave</option>
+                                </select>
+                            </div>
+                            <div class="control-group">
+                                <label>Drive</label>
+                                <input type="range" id="fx-sat-drive" min="1" max="100" step="1" value="1">
+                                <div class="value-display" id="fx-sat-drive-val">1</div>
+                            </div>
+                            <div class="control-group">
+                                <label>Output</label>
+                                <input type="range" id="fx-sat-output" min="0" max="1" step="0.01" value="0.5">
+                                <div class="value-display" id="fx-sat-output-val">0.50</div>
+                            </div>
+                        </div>
+                        <div class="controls">
+                            <div class="control-group">
+                                <label>Tone</label>
+                                <input type="range" id="fx-sat-tone" min="200" max="8000" step="10" value="4000">
+                                <div class="value-display" id="fx-sat-tone-val">4000 Hz</div>
+                            </div>
+                            <div class="control-group">
+                                <label>Mix</label>
+                                <input type="range" id="fx-sat-mix" min="0" max="1" step="0.01" value="1">
+                                <div class="value-display" id="fx-sat-mix-val">1.00</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- EQ -->
+                <div class="fx-unit" id="fx-eq">
+                    <div class="fx-unit-header">
+                        <span class="fx-unit-label">EQ</span>
+                        <button class="fx-toggle off" id="fx-eq-toggle">OFF</button>
+                    </div>
+                    <div class="fx-unit-body">
+                        <div class="controls">
+                            <div class="control-group">
+                                <label>HP Freq</label>
+                                <input type="range" id="fx-eq-hp" min="20" max="2000" step="1" value="20">
+                                <div class="value-display" id="fx-eq-hp-val">20 Hz</div>
+                            </div>
+                            <div class="control-group">
+                                <label>Band Freq</label>
+                                <input type="range" id="fx-eq-band-freq" min="100" max="10000" step="10" value="1000">
+                                <div class="value-display" id="fx-eq-band-freq-val">1000 Hz</div>
+                            </div>
+                            <div class="control-group">
+                                <label>Band Gain</label>
+                                <input type="range" id="fx-eq-band-gain" min="-24" max="24" step="0.5" value="0">
+                                <div class="value-display" id="fx-eq-band-gain-val">0 dB</div>
+                            </div>
+                        </div>
+                        <div class="controls">
+                            <div class="control-group">
+                                <label>Band Q</label>
+                                <input type="range" id="fx-eq-band-q" min="0.1" max="18" step="0.1" value="1">
+                                <div class="value-display" id="fx-eq-band-q-val">1.0</div>
+                            </div>
+                            <div class="control-group">
+                                <label>Shelf Freq</label>
+                                <input type="range" id="fx-eq-shelf-freq" min="1000" max="16000" step="100"
+                                    value="8000">
+                                <div class="value-display" id="fx-eq-shelf-freq-val">8000 Hz</div>
+                            </div>
+                            <div class="control-group">
+                                <label>Shelf Gain</label>
+                                <input type="range" id="fx-eq-shelf-gain" min="-12" max="12" step="0.5" value="0">
+                                <div class="value-display" id="fx-eq-shelf-gain-val">0 dB</div>
+                            </div>
+                        </div>
+                        <canvas class="fx-eq-canvas" id="fx-eq-canvas" width="560" height="120"></canvas>
+                    </div>
+                </div>
+
+                <!-- Chorus -->
+                <div class="fx-unit" id="fx-chorus">
+                    <div class="fx-unit-header">
+                        <span class="fx-unit-label">Chorus</span>
+                        <button class="fx-toggle off" id="fx-chorus-toggle">OFF</button>
+                    </div>
+                    <div class="fx-unit-body">
+                        <div class="controls">
+                            <div class="control-group">
+                                <label>Rate (Hz)</label>
+                                <input type="range" id="fx-chorus-rate" min="0.1" max="5" step="0.1" value="0.8">
+                                <div class="value-display" id="fx-chorus-rate-val">0.8</div>
+                            </div>
+                            <div class="control-group">
+                                <label>Depth (ms)</label>
+                                <input type="range" id="fx-chorus-depth" min="0" max="20" step="0.5" value="2">
+                                <div class="value-display" id="fx-chorus-depth-val">2.0</div>
+                            </div>
+                            <div class="control-group">
+                                <label>Delay (ms)</label>
+                                <input type="range" id="fx-chorus-delay" min="1" max="30" step="0.5" value="10">
+                                <div class="value-display" id="fx-chorus-delay-val">10.0</div>
+                            </div>
+                        </div>
+                        <div class="controls">
+                            <div class="control-group">
+                                <label>Spread</label>
+                                <input type="range" id="fx-chorus-spread" min="0" max="100" step="1" value="50">
+                                <div class="value-display" id="fx-chorus-spread-val">50%</div>
+                            </div>
+                            <div class="control-group">
+                                <label>Mix</label>
+                                <input type="range" id="fx-chorus-mix" min="0" max="1" step="0.01" value="0.5">
+                                <div class="value-display" id="fx-chorus-mix-val">0.50</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Delay -->
+                <div class="fx-unit" id="fx-delay">
+                    <div class="fx-unit-header">
+                        <span class="fx-unit-label">Delay</span>
+                        <button class="fx-toggle off" id="fx-delay-toggle">OFF</button>
+                    </div>
+                    <div class="fx-unit-body">
+                        <div class="controls">
+                            <div class="control-group">
+                                <label>Time (ms)</label>
+                                <input type="range" id="fx-delay-time" min="1" max="2000" step="1" value="300">
+                                <div class="value-display" id="fx-delay-time-val">300</div>
+                            </div>
+                            <div class="control-group">
+                                <label>Feedback</label>
+                                <input type="range" id="fx-delay-feedback" min="0" max="0.95" step="0.01" value="0.3">
+                                <div class="value-display" id="fx-delay-feedback-val">0.30</div>
+                            </div>
+                            <div class="control-group">
+                                <label>Mix</label>
+                                <input type="range" id="fx-delay-mix" min="0" max="1" step="0.01" value="0.3">
+                                <div class="value-display" id="fx-delay-mix-val">0.30</div>
+                            </div>
+                        </div>
+                        <div class="controls">
+                            <div class="control-group">
+                                <label>Ping-Pong</label>
+                                <button class="fx-toggle off" id="fx-delay-pp">OFF</button>
+                            </div>
+                            <div class="control-group">
+                                <label>Filter</label>
+                                <input type="range" id="fx-delay-filter" min="200" max="12000" step="100" value="5000">
+                                <div class="value-display" id="fx-delay-filter-val">5000 Hz</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Reverb -->
+                <div class="fx-unit" id="fx-reverb">
+                    <div class="fx-unit-header">
+                        <span class="fx-unit-label">Reverb</span>
+                        <button class="fx-toggle off" id="fx-reverb-toggle">OFF</button>
+                    </div>
+                    <div class="fx-unit-body">
+                        <div class="controls">
+                            <div class="control-group">
+                                <label>Size (s)</label>
+                                <input type="range" id="fx-reverb-size" min="0.1" max="8" step="0.1" value="2">
+                                <div class="value-display" id="fx-reverb-size-val">2.0</div>
+                            </div>
+                            <div class="control-group">
+                                <label>Pre-delay (ms)</label>
+                                <input type="range" id="fx-reverb-predelay" min="0" max="100" step="1" value="10">
+                                <div class="value-display" id="fx-reverb-predelay-val">10</div>
+                            </div>
+                        </div>
+                        <div class="controls">
+                            <div class="control-group">
+                                <label>Damping</label>
+                                <input type="range" id="fx-reverb-damping" min="1000" max="16000" step="100"
+                                    value="8000">
+                                <div class="value-display" id="fx-reverb-damping-val">8000 Hz</div>
+                            </div>
+                            <div class="control-group">
+                                <label>Mix</label>
+                                <input type="range" id="fx-reverb-mix" min="0" max="1" step="0.01" value="0.3">
+                                <div class="value-display" id="fx-reverb-mix-val">0.30</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Compressor -->
+                <div class="fx-unit" id="fx-compressor">
+                    <div class="fx-unit-header">
+                        <span class="fx-unit-label">Compressor</span>
+                        <button class="fx-toggle off" id="fx-compressor-toggle">OFF</button>
+                    </div>
+                    <div class="fx-unit-body">
+                        <div class="controls">
+                            <div class="control-group">
+                                <label>Threshold</label>
+                                <input type="range" id="fx-comp-threshold" min="-60" max="0" step="1" value="-24">
+                                <div class="value-display" id="fx-comp-threshold-val">-24 dB</div>
+                            </div>
+                            <div class="control-group">
+                                <label>Ratio</label>
+                                <input type="range" id="fx-comp-ratio" min="1" max="20" step="0.5" value="4">
+                                <div class="value-display" id="fx-comp-ratio-val">4.0</div>
+                            </div>
+                            <div class="control-group">
+                                <label>Attack</label>
+                                <input type="range" id="fx-comp-attack" min="0.001" max="0.1" step="0.001"
+                                    value="0.003">
+                                <div class="value-display" id="fx-comp-attack-val">3 ms</div>
+                            </div>
+                        </div>
+                        <div class="controls">
+                            <div class="control-group">
+                                <label>Release</label>
+                                <input type="range" id="fx-comp-release" min="0.01" max="1" step="0.01" value="0.25">
+                                <div class="value-display" id="fx-comp-release-val">250 ms</div>
+                            </div>
+                            <div class="control-group">
+                                <label>Makeup (dB)</label>
+                                <input type="range" id="fx-comp-makeup" min="0" max="24" step="0.5" value="0">
+                                <div class="value-display" id="fx-comp-makeup-val">0.0 dB</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <canvas id="keyboard" width="696" height="140"></canvas>
+        <div class="hint">Click keys or use keyboard: A-K (white) &amp; W-U (black) | Drag ADSR handles to shape
+            envelope</div>
     </div>
-  </div>
 
-  <!-- ═══ FX PAGE ═══ -->
-  <div class="main-page" id="page-fx">
-    <div class="synth-body">
-
-      <!-- Saturation -->
-      <div class="fx-unit" id="fx-saturation">
-        <div class="fx-unit-header">
-          <span class="fx-unit-label">Saturation</span>
-          <button class="fx-toggle off" id="fx-saturation-toggle">OFF</button>
-        </div>
-        <div class="fx-unit-body">
-          <div class="controls">
-            <div class="control-group">
-              <label>Type</label>
-              <select id="fx-sat-type">
-                <option value="soft" selected>Soft</option>
-                <option value="hard">Hard</option>
-                <option value="wave">Wave</option>
-              </select>
-            </div>
-            <div class="control-group">
-              <label>Drive</label>
-              <input type="range" id="fx-sat-drive" min="1" max="100" step="1" value="1">
-              <div class="value-display" id="fx-sat-drive-val">1</div>
-            </div>
-            <div class="control-group">
-              <label>Output</label>
-              <input type="range" id="fx-sat-output" min="0" max="1" step="0.01" value="0.5">
-              <div class="value-display" id="fx-sat-output-val">0.50</div>
-            </div>
-          </div>
-          <div class="controls">
-            <div class="control-group">
-              <label>Tone</label>
-              <input type="range" id="fx-sat-tone" min="200" max="8000" step="10" value="4000">
-              <div class="value-display" id="fx-sat-tone-val">4000 Hz</div>
-            </div>
-            <div class="control-group">
-              <label>Mix</label>
-              <input type="range" id="fx-sat-mix" min="0" max="1" step="0.01" value="1">
-              <div class="value-display" id="fx-sat-mix-val">1.00</div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- EQ -->
-      <div class="fx-unit" id="fx-eq">
-        <div class="fx-unit-header">
-          <span class="fx-unit-label">EQ</span>
-          <button class="fx-toggle off" id="fx-eq-toggle">OFF</button>
-        </div>
-        <div class="fx-unit-body">
-          <div class="controls">
-            <div class="control-group">
-              <label>HP Freq</label>
-              <input type="range" id="fx-eq-hp" min="20" max="2000" step="1" value="20">
-              <div class="value-display" id="fx-eq-hp-val">20 Hz</div>
-            </div>
-            <div class="control-group">
-              <label>Band Freq</label>
-              <input type="range" id="fx-eq-band-freq" min="100" max="10000" step="10" value="1000">
-              <div class="value-display" id="fx-eq-band-freq-val">1000 Hz</div>
-            </div>
-            <div class="control-group">
-              <label>Band Gain</label>
-              <input type="range" id="fx-eq-band-gain" min="-24" max="24" step="0.5" value="0">
-              <div class="value-display" id="fx-eq-band-gain-val">0 dB</div>
-            </div>
-          </div>
-          <div class="controls">
-            <div class="control-group">
-              <label>Band Q</label>
-              <input type="range" id="fx-eq-band-q" min="0.1" max="18" step="0.1" value="1">
-              <div class="value-display" id="fx-eq-band-q-val">1.0</div>
-            </div>
-            <div class="control-group">
-              <label>Shelf Freq</label>
-              <input type="range" id="fx-eq-shelf-freq" min="1000" max="16000" step="100" value="8000">
-              <div class="value-display" id="fx-eq-shelf-freq-val">8000 Hz</div>
-            </div>
-            <div class="control-group">
-              <label>Shelf Gain</label>
-              <input type="range" id="fx-eq-shelf-gain" min="-12" max="12" step="0.5" value="0">
-              <div class="value-display" id="fx-eq-shelf-gain-val">0 dB</div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Chorus -->
-      <div class="fx-unit" id="fx-chorus">
-        <div class="fx-unit-header">
-          <span class="fx-unit-label">Chorus</span>
-          <button class="fx-toggle off" id="fx-chorus-toggle">OFF</button>
-        </div>
-        <div class="fx-unit-body">
-          <div class="controls">
-            <div class="control-group">
-              <label>Rate (Hz)</label>
-              <input type="range" id="fx-chorus-rate" min="0.1" max="5" step="0.1" value="0.8">
-              <div class="value-display" id="fx-chorus-rate-val">0.8</div>
-            </div>
-            <div class="control-group">
-              <label>Depth (ms)</label>
-              <input type="range" id="fx-chorus-depth" min="0" max="20" step="0.5" value="2">
-              <div class="value-display" id="fx-chorus-depth-val">2.0</div>
-            </div>
-            <div class="control-group">
-              <label>Delay (ms)</label>
-              <input type="range" id="fx-chorus-delay" min="1" max="30" step="0.5" value="10">
-              <div class="value-display" id="fx-chorus-delay-val">10.0</div>
-            </div>
-          </div>
-          <div class="controls">
-            <div class="control-group">
-              <label>Spread</label>
-              <input type="range" id="fx-chorus-spread" min="0" max="100" step="1" value="50">
-              <div class="value-display" id="fx-chorus-spread-val">50%</div>
-            </div>
-            <div class="control-group">
-              <label>Mix</label>
-              <input type="range" id="fx-chorus-mix" min="0" max="1" step="0.01" value="0.5">
-              <div class="value-display" id="fx-chorus-mix-val">0.50</div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Delay -->
-      <div class="fx-unit" id="fx-delay">
-        <div class="fx-unit-header">
-          <span class="fx-unit-label">Delay</span>
-          <button class="fx-toggle off" id="fx-delay-toggle">OFF</button>
-        </div>
-        <div class="fx-unit-body">
-          <div class="controls">
-            <div class="control-group">
-              <label>Time (ms)</label>
-              <input type="range" id="fx-delay-time" min="1" max="2000" step="1" value="300">
-              <div class="value-display" id="fx-delay-time-val">300</div>
-            </div>
-            <div class="control-group">
-              <label>Feedback</label>
-              <input type="range" id="fx-delay-feedback" min="0" max="0.95" step="0.01" value="0.3">
-              <div class="value-display" id="fx-delay-feedback-val">0.30</div>
-            </div>
-            <div class="control-group">
-              <label>Mix</label>
-              <input type="range" id="fx-delay-mix" min="0" max="1" step="0.01" value="0.3">
-              <div class="value-display" id="fx-delay-mix-val">0.30</div>
-            </div>
-          </div>
-          <div class="controls">
-            <div class="control-group">
-              <label>Ping-Pong</label>
-              <button class="fx-toggle off" id="fx-delay-pp">OFF</button>
-            </div>
-            <div class="control-group">
-              <label>Filter</label>
-              <input type="range" id="fx-delay-filter" min="200" max="12000" step="100" value="5000">
-              <div class="value-display" id="fx-delay-filter-val">5000 Hz</div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Reverb -->
-      <div class="fx-unit" id="fx-reverb">
-        <div class="fx-unit-header">
-          <span class="fx-unit-label">Reverb</span>
-          <button class="fx-toggle off" id="fx-reverb-toggle">OFF</button>
-        </div>
-        <div class="fx-unit-body">
-          <div class="controls">
-            <div class="control-group">
-              <label>Size (s)</label>
-              <input type="range" id="fx-reverb-size" min="0.1" max="8" step="0.1" value="2">
-              <div class="value-display" id="fx-reverb-size-val">2.0</div>
-            </div>
-            <div class="control-group">
-              <label>Pre-delay (ms)</label>
-              <input type="range" id="fx-reverb-predelay" min="0" max="100" step="1" value="10">
-              <div class="value-display" id="fx-reverb-predelay-val">10</div>
-            </div>
-          </div>
-          <div class="controls">
-            <div class="control-group">
-              <label>Damping</label>
-              <input type="range" id="fx-reverb-damping" min="1000" max="16000" step="100" value="8000">
-              <div class="value-display" id="fx-reverb-damping-val">8000 Hz</div>
-            </div>
-            <div class="control-group">
-              <label>Mix</label>
-              <input type="range" id="fx-reverb-mix" min="0" max="1" step="0.01" value="0.3">
-              <div class="value-display" id="fx-reverb-mix-val">0.30</div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Compressor -->
-      <div class="fx-unit" id="fx-compressor">
-        <div class="fx-unit-header">
-          <span class="fx-unit-label">Compressor</span>
-          <button class="fx-toggle off" id="fx-compressor-toggle">OFF</button>
-        </div>
-        <div class="fx-unit-body">
-          <div class="controls">
-            <div class="control-group">
-              <label>Threshold</label>
-              <input type="range" id="fx-comp-threshold" min="-60" max="0" step="1" value="-24">
-              <div class="value-display" id="fx-comp-threshold-val">-24 dB</div>
-            </div>
-            <div class="control-group">
-              <label>Ratio</label>
-              <input type="range" id="fx-comp-ratio" min="1" max="20" step="0.5" value="4">
-              <div class="value-display" id="fx-comp-ratio-val">4.0</div>
-            </div>
-            <div class="control-group">
-              <label>Attack</label>
-              <input type="range" id="fx-comp-attack" min="0.001" max="0.1" step="0.001" value="0.003">
-              <div class="value-display" id="fx-comp-attack-val">3 ms</div>
-            </div>
-          </div>
-          <div class="controls">
-            <div class="control-group">
-              <label>Release</label>
-              <input type="range" id="fx-comp-release" min="0.01" max="1" step="0.01" value="0.25">
-              <div class="value-display" id="fx-comp-release-val">250 ms</div>
-            </div>
-            <div class="control-group">
-              <label>Makeup (dB)</label>
-              <input type="range" id="fx-comp-makeup" min="0" max="24" step="0.5" value="0">
-              <div class="value-display" id="fx-comp-makeup-val">0.0 dB</div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-    </div>
-  </div>
-
-  <canvas id="keyboard" width="696" height="140"></canvas>
-  <div class="hint">Click keys or use keyboard: A-K (white) &amp; W-U (black) | Drag ADSR handles to shape envelope</div>
-</div>
-
-<script>
-window.addEventListener('error', e => {
-  document.getElementById('synth').insertAdjacentHTML('afterbegin',
-    '<div style="background:#e94560;color:#fff;padding:8px 12px;border-radius:6px;margin-bottom:12px;font-size:13px;font-family:monospace">'
-    + e.message + ' — ' + (e.filename||'').split('/').pop() + ':' + e.lineno + '</div>');
-});
-</script>
-<script type="module" src="js/main.js"></script>
+    <script>
+        window.addEventListener('error', e => {
+            document.getElementById('synth').insertAdjacentHTML('afterbegin',
+                '<div style="background:#e94560;color:#fff;padding:8px 12px;border-radius:6px;margin-bottom:12px;font-size:13px;font-family:monospace">'
+                + e.message + ' — ' + (e.filename || '').split('/').pop() + ':' + e.lineno + '</div>');
+        });
+    </script>
+    <script type="module" src="dist/main.js"></script>
 </body>
+
 </html>

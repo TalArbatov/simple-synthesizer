@@ -12,7 +12,8 @@
       "Bash(ls:*)",
       "Bash(node_modules/.bin/tsc)",
       "Bash(echo:*)",
-      "Bash(./node_modules/typescript/bin/tsc:*)"
+      "Bash(./node_modules/typescript/bin/tsc:*)",
+      "Bash(find:*)"
     ]
   }
 }

@@ -10,11 +10,11 @@ COPY . .
 # COPY . /app
 
 # run a command in the image while setting it up
-RUN npm install
+RUN cd server && npm install && cd ../client && npm install
 
 # only for documentation purposes
 EXPOSE 3005
 
 # this will not be executed when image is created
 # only when container is created
-CMD ["npm", "start"] 
+CMD ["./scripts/run.sh"] 

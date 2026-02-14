@@ -1,12 +1,7 @@
+import type { ADSR } from './types.js';
+
 type VoiceWaveform = OscillatorType;
 type VoiceFilterType = BiquadFilterType;
-
-interface ADSR {
-  a: number;
-  d: number;
-  s: number;
-  r: number;
-}
 
 interface ActiveNote {
   oscillators: OscillatorNode[];

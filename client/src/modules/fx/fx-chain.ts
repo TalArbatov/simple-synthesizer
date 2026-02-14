@@ -14,7 +14,7 @@ import type {
   SaturationParams
 } from '../types.js';
 
-interface FXChain {
+export interface FXChain {
   input: GainNode;
   output: GainNode;
   saturation: EffectUnit<SaturationParams>;

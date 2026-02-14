@@ -111,6 +111,31 @@ function bindOscControls(voiceIndex, prefix) {
     voice.setDetune(cents);
   });
 
+  const unisonCountSlider = document.getElementById(`unison-count${voiceIndex + 1}`);
+  const unisonCountVal = document.getElementById(`unison-count${voiceIndex + 1}-val`);
+  const unisonDetuneSlider = document.getElementById(`unison-detune${voiceIndex + 1}`);
+  const unisonDetuneVal = document.getElementById(`unison-detune${voiceIndex + 1}-val`);
+  const unisonSpreadSlider = document.getElementById(`unison-spread${voiceIndex + 1}`);
+  const unisonSpreadVal = document.getElementById(`unison-spread${voiceIndex + 1}-val`);
+
+  unisonCountSlider.addEventListener('input', () => {
+    const n = parseInt(unisonCountSlider.value);
+    unisonCountVal.textContent = n;
+    voice.setUnisonCount(n);
+  });
+
+  unisonDetuneSlider.addEventListener('input', () => {
+    const cents = parseFloat(unisonDetuneSlider.value);
+    unisonDetuneVal.textContent = cents;
+    voice.setUnisonDetune(cents);
+  });
+
+  unisonSpreadSlider.addEventListener('input', () => {
+    const spread = parseFloat(unisonSpreadSlider.value) / 100;
+    unisonSpreadVal.textContent = unisonSpreadSlider.value + '%';
+    voice.setUnisonSpread(spread);
+  });
+
   const filterTypeSel = document.getElementById(`filter-type${voiceIndex + 1}`);
   filterTypeSel.addEventListener('change', () => {
     voice.setFilterType(filterTypeSel.value);

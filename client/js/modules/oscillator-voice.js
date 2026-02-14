@@ -9,7 +9,7 @@ export class OscillatorVoice {
     this.filter.frequency.value = 2000;
     this.filter.Q.value = 1;
 
-    this.activeNotes = new Map(); // freq -> { oscillator, filter, gainNode }
+    this.activeNotes = new Map(); // freq -> { oscillators, panners, filter, gainNode }
     this.enabled = true;
     this.volume = 0.5;
     this.waveform = 'sawtooth';
@@ -19,6 +19,11 @@ export class OscillatorVoice {
     this.filterEnabled = true;
     this.cutoff = 2000;
     this.resonance = 1;
+
+    // Unison
+    this.unisonCount = 1;
+    this.unisonDetune = 20;
+    this.unisonSpread = 0.5;
   }
 
   setEnabled(enabled) {
@@ -33,7 +38,9 @@ export class OscillatorVoice {
   setWaveform(waveform) {
     this.waveform = waveform;
     for (const note of this.activeNotes.values()) {
-      note.oscillator.type = waveform;
+      for (const osc of note.oscillators) {
+        osc.type = waveform;
+      }
     }
   }
 
@@ -41,7 +48,11 @@ export class OscillatorVoice {
     this.detune = cents;
     const now = this.audioCtx.currentTime;
     for (const note of this.activeNotes.values()) {
-      note.oscillator.detune.setValueAtTime(cents, now);
+      const N = note.oscillators.length;
+      for (let i = 0; i < N; i++) {
+        const unisonOffset = N > 1 ? this.unisonDetune * (2 * i / (N - 1) - 1) : 0;
+        note.oscillators[i].detune.setValueAtTime(cents + unisonOffset, now);
+      }
     }
   }
 
@@ -52,13 +63,23 @@ export class OscillatorVoice {
   setFilterEnabled(enabled) {
     this.filterEnabled = enabled;
     for (const note of this.activeNotes.values()) {
-      note.oscillator.disconnect();
+      // Disconnect all oscillators/panners and filter
+      for (let i = 0; i < note.oscillators.length; i++) {
+        note.oscillators[i].disconnect();
+        note.panners[i].disconnect();
+      }
       note.filter.disconnect();
+      // Reconnect
+      for (let i = 0; i < note.oscillators.length; i++) {
+        note.oscillators[i].connect(note.panners[i]);
+        if (enabled) {
+          note.panners[i].connect(note.filter);
+        } else {
+          note.panners[i].connect(note.gainNode);
+        }
+      }
       if (enabled) {
-        note.oscillator.connect(note.filter);
         note.filter.connect(note.gainNode);
-      } else {
-        note.oscillator.connect(note.gainNode);
       }
     }
   }
@@ -89,6 +110,103 @@ export class OscillatorVoice {
     }
   }
 
+  setUnisonCount(n) {
+    this.unisonCount = n;
+    // Rebuild all active notes with the new voice count
+    for (const freq of [...this.activeNotes.keys()]) {
+      this._rebuildNote(freq);
+    }
+  }
+
+  setUnisonDetune(cents) {
+    this.unisonDetune = cents;
+    const now = this.audioCtx.currentTime;
+    for (const note of this.activeNotes.values()) {
+      const N = note.oscillators.length;
+      for (let i = 0; i < N; i++) {
+        const unisonOffset = N > 1 ? cents * (2 * i / (N - 1) - 1) : 0;
+        note.oscillators[i].detune.setValueAtTime(this.detune + unisonOffset, now);
+      }
+    }
+  }
+
+  setUnisonSpread(spread) {
+    this.unisonSpread = spread;
+    for (const note of this.activeNotes.values()) {
+      const N = note.panners.length;
+      for (let i = 0; i < N; i++) {
+        const pan = N > 1 ? spread * (2 * i / (N - 1) - 1) : 0;
+        note.panners[i].pan.setValueAtTime(pan, this.audioCtx.currentTime);
+      }
+    }
+  }
+
+  _rebuildNote(freq) {
+    const old = this.activeNotes.get(freq);
+    if (!old) return;
+
+    const now = this.audioCtx.currentTime;
+    const currentGain = old.gainNode.gain.value;
+    const N = this.unisonCount;
+
+    // Tear down old oscillators/panners
+    for (const osc of old.oscillators) {
+      osc.stop();
+      osc.disconnect();
+    }
+    for (const panner of old.panners) {
+      panner.disconnect();
+    }
+    old.filter.disconnect();
+
+    // Reuse existing filter and gainNode to preserve gain envelope
+    const filter = old.filter;
+    filter.type = this.filterType;
+    filter.frequency.setValueAtTime(this.cutoff, now);
+    filter.Q.setValueAtTime(this.resonance, now);
+
+    const gainNode = old.gainNode;
+    const scaledVolume = this.volume / Math.sqrt(N);
+
+    // Rescale gain to new voice count, preserving sustain ratio
+    gainNode.gain.cancelScheduledValues(now);
+    const ratio = currentGain > 0 ? currentGain / (old.oscillators.length > 0 ? this.volume / Math.sqrt(old.oscillators.length) : this.volume) : 0;
+    gainNode.gain.setValueAtTime(scaledVolume * ratio, now);
+
+    const oscillators = [];
+    const panners = [];
+
+    for (let i = 0; i < N; i++) {
+      const unisonOffset = N > 1 ? this.unisonDetune * (2 * i / (N - 1) - 1) : 0;
+      const pan = N > 1 ? this.unisonSpread * (2 * i / (N - 1) - 1) : 0;
+
+      const osc = this.audioCtx.createOscillator();
+      osc.type = this.waveform;
+      osc.frequency.setValueAtTime(freq, now);
+      osc.detune.setValueAtTime(this.detune + unisonOffset, now);
+
+      const panner = this.audioCtx.createStereoPanner();
+      panner.pan.setValueAtTime(pan, now);
+
+      osc.connect(panner);
+      if (this.filterEnabled) {
+        panner.connect(filter);
+      } else {
+        panner.connect(gainNode);
+      }
+
+      osc.start(now);
+      oscillators.push(osc);
+      panners.push(panner);
+    }
+
+    if (this.filterEnabled) {
+      filter.connect(gainNode);
+    }
+
+    this.activeNotes.set(freq, { oscillators, panners, filter, gainNode });
+  }
+
   noteOn(freq) {
     if (!this.enabled) return;
 
@@ -98,6 +216,7 @@ export class OscillatorVoice {
     }
 
     const now = this.audioCtx.currentTime;
+    const N = this.unisonCount;
 
     const filter = this.audioCtx.createBiquadFilter();
     filter.type = this.filterType;
@@ -107,27 +226,46 @@ export class OscillatorVoice {
     const gainNode = this.audioCtx.createGain();
     gainNode.gain.value = 0;
 
-    const oscillator = this.audioCtx.createOscillator();
-    oscillator.type = this.waveform;
-    oscillator.frequency.setValueAtTime(freq, now);
-    oscillator.detune.setValueAtTime(this.detune, now);
+    const oscillators = [];
+    const panners = [];
+    const scaledVolume = this.volume / Math.sqrt(N);
+
+    for (let i = 0; i < N; i++) {
+      const unisonOffset = N > 1 ? this.unisonDetune * (2 * i / (N - 1) - 1) : 0;
+      const pan = N > 1 ? this.unisonSpread * (2 * i / (N - 1) - 1) : 0;
+
+      const osc = this.audioCtx.createOscillator();
+      osc.type = this.waveform;
+      osc.frequency.setValueAtTime(freq, now);
+      osc.detune.setValueAtTime(this.detune + unisonOffset, now);
+
+      const panner = this.audioCtx.createStereoPanner();
+      panner.pan.setValueAtTime(pan, now);
+
+      osc.connect(panner);
+      if (this.filterEnabled) {
+        panner.connect(filter);
+      } else {
+        panner.connect(gainNode);
+      }
+
+      osc.start(now);
+      oscillators.push(osc);
+      panners.push(panner);
+    }
 
     if (this.filterEnabled) {
-      oscillator.connect(filter);
       filter.connect(gainNode);
-    } else {
-      oscillator.connect(gainNode);
     }
     gainNode.connect(this.destination);
-    oscillator.start(now);
 
     // ADSR attack + decay
     const g = gainNode.gain;
     g.setValueAtTime(0, now);
-    g.linearRampToValueAtTime(this.volume, now + this.adsr.a);
-    g.linearRampToValueAtTime(this.volume * this.adsr.s, now + this.adsr.a + this.adsr.d);
+    g.linearRampToValueAtTime(scaledVolume, now + this.adsr.a);
+    g.linearRampToValueAtTime(scaledVolume * this.adsr.s, now + this.adsr.a + this.adsr.d);
 
-    this.activeNotes.set(freq, { oscillator, filter, gainNode });
+    this.activeNotes.set(freq, { oscillators, panners, filter, gainNode });
   }
 
   noteOff(freq) {
@@ -146,8 +284,13 @@ export class OscillatorVoice {
 
     setTimeout(() => {
       try {
-        note.oscillator.stop();
-        note.oscillator.disconnect();
+        for (const osc of note.oscillators) {
+          osc.stop();
+          osc.disconnect();
+        }
+        for (const panner of note.panners) {
+          panner.disconnect();
+        }
         note.filter.disconnect();
         note.gainNode.disconnect();
       } catch(e) {}

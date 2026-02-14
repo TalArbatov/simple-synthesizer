@@ -1,0 +1,38 @@
+import { startAnimationLoop } from '../../modules/animation-loop.js';
+import { initSyncOutbound, initSyncReceive } from '../../modules/sync-handlers.js';
+import { byCanvasId, byId } from './dom.js';
+import type { SynthRuntime } from './runtime.js';
+import type { SynthViews } from './views.js';
+
+export function wireSynth(runtime: SynthRuntime, views: SynthViews) {
+  const { sync, engine, lfos, state } = runtime;
+  const { adsrGraphs, keyboard, drawList } = views;
+
+  startAnimationLoop(engine, lfos, drawList, () => state.baseMasterVolume);
+
+  import('../../modules/filter-graph.js')
+    .then(({ createFilterGraph }) => {
+      drawList.push(
+        createFilterGraph(byCanvasId('filter1-canvas'), byId('filter1-values'), engine.voices[0], () => {
+          sync.send({ t: 'filter', n: 0, cutoff: engine.voices[0].cutoff, q: engine.voices[0].resonance });
+        }),
+      );
+      drawList.push(
+        createFilterGraph(byCanvasId('filter2-canvas'), byId('filter2-values'), engine.voices[1], () => {
+          sync.send({ t: 'filter', n: 1, cutoff: engine.voices[1].cutoff, q: engine.voices[1].resonance });
+        }),
+      );
+    })
+    .catch((e) => console.error('Filter graph load failed:', e));
+
+  // Keep runtime volume aligned with initial UI value.
+  const masterVolumeText = byId('master-volume-val').textContent ?? '0.70';
+  const parsed = Number.parseFloat(masterVolumeText);
+  if (!Number.isNaN(parsed)) {
+    state.baseMasterVolume = parsed;
+    engine.setMasterVolume(parsed);
+  }
+
+  initSyncOutbound(sync);
+  initSyncReceive(sync, engine, adsrGraphs, keyboard);
+}

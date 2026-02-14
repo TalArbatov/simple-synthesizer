@@ -1,8 +1,16 @@
 export class OscillatorVoice {
   constructor(audioCtx, destination) {
     this.audioCtx = audioCtx;
+
+    this.filter = audioCtx.createBiquadFilter();
+    this.filter.type = 'lowpass';
+    this.filter.frequency.value = 2000;
+    this.filter.Q.value = 1;
+
     this.gainNode = audioCtx.createGain();
     this.gainNode.gain.value = 0;
+
+    this.filter.connect(this.gainNode);
     this.gainNode.connect(destination);
 
     this.oscillator = null;
@@ -11,6 +19,9 @@ export class OscillatorVoice {
     this.waveform = 'sawtooth';
     this.detune = 0;
     this.adsr = { a: 0.05, d: 0.12, s: 0.7, r: 0.3 };
+    this.filterType = 'lowpass';
+    this.cutoff = 2000;
+    this.resonance = 1;
   }
 
   setEnabled(enabled) {
@@ -36,6 +47,21 @@ export class OscillatorVoice {
     this.volume = vol;
   }
 
+  setFilterType(type) {
+    this.filterType = type;
+    this.filter.type = type;
+  }
+
+  setFilterCutoff(freq) {
+    this.cutoff = freq;
+    this.filter.frequency.setValueAtTime(freq, this.audioCtx.currentTime);
+  }
+
+  setFilterResonance(q) {
+    this.resonance = q;
+    this.filter.Q.setValueAtTime(q, this.audioCtx.currentTime);
+  }
+
   noteOn(freq) {
     if (!this.enabled) return;
     const now = this.audioCtx.currentTime;
@@ -47,7 +73,7 @@ export class OscillatorVoice {
       this.oscillator.type = this.waveform;
       this.oscillator.frequency.setValueAtTime(freq, now);
       this.oscillator.detune.setValueAtTime(this.detune, now);
-      this.oscillator.connect(this.gainNode);
+      this.oscillator.connect(this.filter);
       this.oscillator.start(now);
     }
 

@@ -38,6 +38,20 @@
           <div class="value-display" id="detune1-val">0</div>
         </div>
       </div>
+      <div class="filter-section">
+        <div class="controls">
+          <div class="control-group">
+            <label>Filter</label>
+            <select id="filter-type1">
+              <option value="lowpass" selected>Low Pass</option>
+              <option value="highpass">High Pass</option>
+              <option value="bandpass">Band Pass</option>
+            </select>
+          </div>
+        </div>
+        <canvas class="filter-canvas" id="filter1-canvas" width="560" height="120"></canvas>
+        <div class="filter-values" id="filter1-values"></div>
+      </div>
       <canvas class="adsr-canvas" id="adsr1-canvas" width="560" height="120"></canvas>
       <div class="adsr-values" id="adsr1-values"></div>
     </div>
@@ -67,6 +81,20 @@
           <input type="range" id="detune2" min="-100" max="100" step="1" value="0">
           <div class="value-display" id="detune2-val">0</div>
         </div>
+      </div>
+      <div class="filter-section">
+        <div class="controls">
+          <div class="control-group">
+            <label>Filter</label>
+            <select id="filter-type2">
+              <option value="lowpass" selected>Low Pass</option>
+              <option value="highpass">High Pass</option>
+              <option value="bandpass">Band Pass</option>
+            </select>
+          </div>
+        </div>
+        <canvas class="filter-canvas" id="filter2-canvas" width="560" height="120"></canvas>
+        <div class="filter-values" id="filter2-values"></div>
       </div>
       <canvas class="adsr-canvas" id="adsr2-canvas" width="560" height="120"></canvas>
       <div class="adsr-values" id="adsr2-values"></div>

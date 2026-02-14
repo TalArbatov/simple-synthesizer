@@ -37,13 +37,33 @@ const waveform = createWaveformDisplay(
   engine.analyser
 );
 
-// --- Animation loop ---
+// --- Animation loop (started before filter graphs so keyboard always works) ---
+const drawList = [waveform, keyboard];
+
 function animate() {
   requestAnimationFrame(animate);
-  waveform.draw();
-  keyboard.draw();
+  for (const item of drawList) {
+    item.draw();
+  }
 }
 animate();
+
+// --- Filter graphs (dynamic import so it can't block the rest of the page) ---
+import('./modules/filter-graph.js').then(({ createFilterGraph }) => {
+  const fg1 = createFilterGraph(
+    document.getElementById('filter1-canvas'),
+    document.getElementById('filter1-values'),
+    engine.voices[0]
+  );
+  drawList.push(fg1);
+
+  const fg2 = createFilterGraph(
+    document.getElementById('filter2-canvas'),
+    document.getElementById('filter2-values'),
+    engine.voices[1]
+  );
+  drawList.push(fg2);
+}).catch(e => console.error('Filter graph load failed:', e));
 
 // --- Master volume ---
 const masterVolumeSlider = document.getElementById('master-volume');
@@ -88,6 +108,11 @@ function bindOscControls(voiceIndex, prefix) {
     const cents = parseFloat(detuneSlider.value);
     detuneVal.textContent = detuneSlider.value;
     voice.setDetune(cents);
+  });
+
+  const filterTypeSel = document.getElementById(`filter-type${voiceIndex + 1}`);
+  filterTypeSel.addEventListener('change', () => {
+    voice.setFilterType(filterTypeSel.value);
   });
 }
 

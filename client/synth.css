@@ -532,26 +532,69 @@ input[type="range"]::-webkit-slider-thumb {
 }
 
 /* ── FX page ── */
-.fx-empty {
+.fx-unit {
+  background: #1e1e26;
+  border-radius: 6px;
+  border: 1px solid #2a2a30;
+  margin-bottom: 10px;
+  opacity: 0.55;
+  transition: opacity 0.15s;
+}
+
+.fx-unit.active {
+  opacity: 1;
+}
+
+.fx-unit-header {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  justify-content: center;
-  min-height: 200px;
-  color: #333;
-  gap: 8px;
+  justify-content: space-between;
+  padding: 8px 12px;
+  border-bottom: 1px solid #2a2a30;
 }
 
-.fx-empty-icon {
-  font-size: 2rem;
-  opacity: 0.4;
-}
-
-.fx-empty-text {
-  font-size: 0.7rem;
-  font-weight: 500;
-  letter-spacing: 2px;
+.fx-unit-label {
+  font-size: 0.6rem;
+  font-weight: 600;
   text-transform: uppercase;
+  letter-spacing: 2px;
+  color: #5a5a65;
+}
+
+.fx-unit.active .fx-unit-label {
+  color: #00d2ff;
+}
+
+.fx-unit-body {
+  padding: 10px 12px;
+}
+
+.fx-unit-body .controls {
+  margin-bottom: 8px;
+}
+
+.fx-unit-body .controls:last-child {
+  margin-bottom: 0;
+}
+
+.fx-toggle {
+  background: #333;
+  color: #666;
+  border: none;
+  border-radius: 3px;
+  padding: 4px 0;
+  width: 36px;
+  font-size: 0.55rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+  cursor: pointer;
+  text-transform: uppercase;
+  transition: background 0.15s, color 0.15s;
+}
+
+.fx-toggle.on {
+  background: #00d2ff;
+  color: #111;
 }
 
 /* ── Hint ── */

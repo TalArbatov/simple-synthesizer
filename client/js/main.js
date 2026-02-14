@@ -4,12 +4,19 @@ import { createPianoKeyboard } from './modules/piano-keyboard.js';
 import { createWaveformDisplay } from './modules/waveform-display.js';
 import { LFO } from './modules/lfo.js';
 import { createSync } from './modules/sync.js';
+import { createFXChain } from './modules/fx/fx-chain.js';
 
 // --- Sync ---
 const sync = createSync();
 
 // --- Audio engine (2 oscillator voices) ---
 const engine = new AudioEngine(2);
+
+// --- FX Chain ---
+const fxChain = createFXChain(engine.audioCtx);
+engine.masterGain.disconnect();
+engine.masterGain.connect(fxChain.input);
+fxChain.output.connect(engine.analyser);
 
 // --- LFOs (one per oscillator) ---
 const lfos = [new LFO(), new LFO()];
@@ -431,7 +438,9 @@ document.addEventListener('change', (e) => {
 // Sync toggle buttons
 const syncedButtons = new Set([
   'toggle1', 'toggle2', 'filter-toggle1', 'filter-toggle2',
-  'lfo-sync1', 'lfo-sync2', 'lfo-oneshot1', 'lfo-oneshot2'
+  'lfo-sync1', 'lfo-sync2', 'lfo-oneshot1', 'lfo-oneshot2',
+  'fx-saturation-toggle', 'fx-eq-toggle', 'fx-chorus-toggle',
+  'fx-delay-toggle', 'fx-delay-pp', 'fx-reverb-toggle', 'fx-compressor-toggle'
 ]);
 
 document.addEventListener('click', (e) => {
@@ -439,6 +448,193 @@ document.addEventListener('click', (e) => {
     sync.send({ t: 'click', id: e.target.id });
   }
 }, true);
+
+// --- FX controls ---
+function bindFXToggle(id, effect, fxUnit) {
+  const btn = document.getElementById(id);
+  let enabled = false;
+  btn.addEventListener('click', () => {
+    enabled = !enabled;
+    effect.setEnabled(enabled);
+    btn.textContent = enabled ? 'ON' : 'OFF';
+    btn.classList.toggle('on', enabled);
+    btn.classList.toggle('off', !enabled);
+    fxUnit.classList.toggle('active', enabled);
+  });
+}
+
+bindFXToggle('fx-saturation-toggle', fxChain.saturation, document.getElementById('fx-saturation'));
+bindFXToggle('fx-eq-toggle', fxChain.eq, document.getElementById('fx-eq'));
+bindFXToggle('fx-chorus-toggle', fxChain.chorus, document.getElementById('fx-chorus'));
+bindFXToggle('fx-delay-toggle', fxChain.delay, document.getElementById('fx-delay'));
+bindFXToggle('fx-reverb-toggle', fxChain.reverb, document.getElementById('fx-reverb'));
+bindFXToggle('fx-compressor-toggle', fxChain.compressor, document.getElementById('fx-compressor'));
+
+// Saturation controls
+document.getElementById('fx-sat-type').addEventListener('change', (e) => {
+  fxChain.saturation.set({ type: e.target.value });
+});
+document.getElementById('fx-sat-drive').addEventListener('input', (e) => {
+  const v = parseFloat(e.target.value);
+  document.getElementById('fx-sat-drive-val').textContent = v;
+  fxChain.saturation.set({ drive: v });
+});
+document.getElementById('fx-sat-output').addEventListener('input', (e) => {
+  const v = parseFloat(e.target.value);
+  document.getElementById('fx-sat-output-val').textContent = v.toFixed(2);
+  fxChain.saturation.set({ output: v });
+});
+document.getElementById('fx-sat-tone').addEventListener('input', (e) => {
+  const v = parseFloat(e.target.value);
+  document.getElementById('fx-sat-tone-val').textContent = v + ' Hz';
+  fxChain.saturation.set({ tone: v });
+});
+document.getElementById('fx-sat-mix').addEventListener('input', (e) => {
+  const v = parseFloat(e.target.value);
+  document.getElementById('fx-sat-mix-val').textContent = v.toFixed(2);
+  fxChain.saturation.set({ mix: v });
+});
+
+// EQ controls
+document.getElementById('fx-eq-hp').addEventListener('input', (e) => {
+  const v = parseFloat(e.target.value);
+  document.getElementById('fx-eq-hp-val').textContent = v + ' Hz';
+  fxChain.eq.set({ hpFreq: v });
+});
+document.getElementById('fx-eq-band-freq').addEventListener('input', (e) => {
+  const v = parseFloat(e.target.value);
+  document.getElementById('fx-eq-band-freq-val').textContent = v + ' Hz';
+  fxChain.eq.set({ bandFreq: v });
+});
+document.getElementById('fx-eq-band-gain').addEventListener('input', (e) => {
+  const v = parseFloat(e.target.value);
+  document.getElementById('fx-eq-band-gain-val').textContent = v + ' dB';
+  fxChain.eq.set({ bandGain: v });
+});
+document.getElementById('fx-eq-band-q').addEventListener('input', (e) => {
+  const v = parseFloat(e.target.value);
+  document.getElementById('fx-eq-band-q-val').textContent = v.toFixed(1);
+  fxChain.eq.set({ bandQ: v });
+});
+document.getElementById('fx-eq-shelf-freq').addEventListener('input', (e) => {
+  const v = parseFloat(e.target.value);
+  document.getElementById('fx-eq-shelf-freq-val').textContent = v + ' Hz';
+  fxChain.eq.set({ shelfFreq: v });
+});
+document.getElementById('fx-eq-shelf-gain').addEventListener('input', (e) => {
+  const v = parseFloat(e.target.value);
+  document.getElementById('fx-eq-shelf-gain-val').textContent = v + ' dB';
+  fxChain.eq.set({ shelfGain: v });
+});
+
+// Chorus controls
+document.getElementById('fx-chorus-rate').addEventListener('input', (e) => {
+  const v = parseFloat(e.target.value);
+  document.getElementById('fx-chorus-rate-val').textContent = v.toFixed(1);
+  fxChain.chorus.set({ rate: v });
+});
+document.getElementById('fx-chorus-depth').addEventListener('input', (e) => {
+  const v = parseFloat(e.target.value);
+  document.getElementById('fx-chorus-depth-val').textContent = v.toFixed(1);
+  fxChain.chorus.set({ depth: v });
+});
+document.getElementById('fx-chorus-delay').addEventListener('input', (e) => {
+  const v = parseFloat(e.target.value);
+  document.getElementById('fx-chorus-delay-val').textContent = v.toFixed(1);
+  fxChain.chorus.set({ delay: v });
+});
+document.getElementById('fx-chorus-spread').addEventListener('input', (e) => {
+  const v = parseFloat(e.target.value);
+  document.getElementById('fx-chorus-spread-val').textContent = v + '%';
+  fxChain.chorus.set({ spread: v });
+});
+document.getElementById('fx-chorus-mix').addEventListener('input', (e) => {
+  const v = parseFloat(e.target.value);
+  document.getElementById('fx-chorus-mix-val').textContent = v.toFixed(2);
+  fxChain.chorus.set({ mix: v });
+});
+
+// Delay controls
+document.getElementById('fx-delay-time').addEventListener('input', (e) => {
+  const v = parseFloat(e.target.value);
+  document.getElementById('fx-delay-time-val').textContent = v;
+  fxChain.delay.set({ time: v });
+});
+document.getElementById('fx-delay-feedback').addEventListener('input', (e) => {
+  const v = parseFloat(e.target.value);
+  document.getElementById('fx-delay-feedback-val').textContent = v.toFixed(2);
+  fxChain.delay.set({ feedback: v });
+});
+document.getElementById('fx-delay-mix').addEventListener('input', (e) => {
+  const v = parseFloat(e.target.value);
+  document.getElementById('fx-delay-mix-val').textContent = v.toFixed(2);
+  fxChain.delay.set({ mix: v });
+});
+document.getElementById('fx-delay-filter').addEventListener('input', (e) => {
+  const v = parseFloat(e.target.value);
+  document.getElementById('fx-delay-filter-val').textContent = v + ' Hz';
+  fxChain.delay.set({ filterFreq: v });
+});
+
+// Delay ping-pong toggle
+let delayPP = false;
+document.getElementById('fx-delay-pp').addEventListener('click', () => {
+  delayPP = !delayPP;
+  const btn = document.getElementById('fx-delay-pp');
+  btn.textContent = delayPP ? 'ON' : 'OFF';
+  btn.classList.toggle('on', delayPP);
+  btn.classList.toggle('off', !delayPP);
+  fxChain.delay.set({ pingPong: delayPP });
+});
+
+// Reverb controls
+document.getElementById('fx-reverb-size').addEventListener('input', (e) => {
+  const v = parseFloat(e.target.value);
+  document.getElementById('fx-reverb-size-val').textContent = v.toFixed(1);
+  fxChain.reverb.set({ size: v });
+});
+document.getElementById('fx-reverb-predelay').addEventListener('input', (e) => {
+  const v = parseFloat(e.target.value);
+  document.getElementById('fx-reverb-predelay-val').textContent = v;
+  fxChain.reverb.set({ preDelay: v });
+});
+document.getElementById('fx-reverb-damping').addEventListener('input', (e) => {
+  const v = parseFloat(e.target.value);
+  document.getElementById('fx-reverb-damping-val').textContent = v + ' Hz';
+  fxChain.reverb.set({ damping: v });
+});
+document.getElementById('fx-reverb-mix').addEventListener('input', (e) => {
+  const v = parseFloat(e.target.value);
+  document.getElementById('fx-reverb-mix-val').textContent = v.toFixed(2);
+  fxChain.reverb.set({ mix: v });
+});
+
+// Compressor controls
+document.getElementById('fx-comp-threshold').addEventListener('input', (e) => {
+  const v = parseFloat(e.target.value);
+  document.getElementById('fx-comp-threshold-val').textContent = v + ' dB';
+  fxChain.compressor.set({ threshold: v });
+});
+document.getElementById('fx-comp-ratio').addEventListener('input', (e) => {
+  const v = parseFloat(e.target.value);
+  document.getElementById('fx-comp-ratio-val').textContent = v.toFixed(1);
+  fxChain.compressor.set({ ratio: v });
+});
+document.getElementById('fx-comp-attack').addEventListener('input', (e) => {
+  const v = parseFloat(e.target.value);
+  document.getElementById('fx-comp-attack-val').textContent = Math.round(v * 1000) + ' ms';
+  fxChain.compressor.set({ attack: v });
+});
+document.getElementById('fx-comp-release').addEventListener('input', (e) => {
+  const v = parseFloat(e.target.value);
+  document.getElementById('fx-comp-release-val').textContent = Math.round(v * 1000) + ' ms';
+  fxChain.compressor.set({ release: v });
+});
+document.getElementById('fx-comp-makeup').addEventListener('input', (e) => {
+  const v = parseFloat(e.target.value);
+  document.getElementById('fx-comp-makeup-val').textContent = v.toFixed(1) + ' dB';
+  fxChain.compressor.set({ makeup: v });
+});
 
 // Receive handler
 sync.onMessage((msg) => {

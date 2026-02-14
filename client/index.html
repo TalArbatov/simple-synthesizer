@@ -285,9 +285,243 @@
   <!-- ═══ FX PAGE ═══ -->
   <div class="main-page" id="page-fx">
     <div class="synth-body">
-      <div class="fx-empty">
-        <div class="fx-empty-text">No effects loaded</div>
+
+      <!-- Saturation -->
+      <div class="fx-unit" id="fx-saturation">
+        <div class="fx-unit-header">
+          <span class="fx-unit-label">Saturation</span>
+          <button class="fx-toggle off" id="fx-saturation-toggle">OFF</button>
+        </div>
+        <div class="fx-unit-body">
+          <div class="controls">
+            <div class="control-group">
+              <label>Type</label>
+              <select id="fx-sat-type">
+                <option value="soft" selected>Soft</option>
+                <option value="hard">Hard</option>
+                <option value="wave">Wave</option>
+              </select>
+            </div>
+            <div class="control-group">
+              <label>Drive</label>
+              <input type="range" id="fx-sat-drive" min="1" max="100" step="1" value="1">
+              <div class="value-display" id="fx-sat-drive-val">1</div>
+            </div>
+            <div class="control-group">
+              <label>Output</label>
+              <input type="range" id="fx-sat-output" min="0" max="1" step="0.01" value="0.5">
+              <div class="value-display" id="fx-sat-output-val">0.50</div>
+            </div>
+          </div>
+          <div class="controls">
+            <div class="control-group">
+              <label>Tone</label>
+              <input type="range" id="fx-sat-tone" min="200" max="8000" step="10" value="4000">
+              <div class="value-display" id="fx-sat-tone-val">4000 Hz</div>
+            </div>
+            <div class="control-group">
+              <label>Mix</label>
+              <input type="range" id="fx-sat-mix" min="0" max="1" step="0.01" value="1">
+              <div class="value-display" id="fx-sat-mix-val">1.00</div>
+            </div>
+          </div>
+        </div>
       </div>
+
+      <!-- EQ -->
+      <div class="fx-unit" id="fx-eq">
+        <div class="fx-unit-header">
+          <span class="fx-unit-label">EQ</span>
+          <button class="fx-toggle off" id="fx-eq-toggle">OFF</button>
+        </div>
+        <div class="fx-unit-body">
+          <div class="controls">
+            <div class="control-group">
+              <label>HP Freq</label>
+              <input type="range" id="fx-eq-hp" min="20" max="2000" step="1" value="20">
+              <div class="value-display" id="fx-eq-hp-val">20 Hz</div>
+            </div>
+            <div class="control-group">
+              <label>Band Freq</label>
+              <input type="range" id="fx-eq-band-freq" min="100" max="10000" step="10" value="1000">
+              <div class="value-display" id="fx-eq-band-freq-val">1000 Hz</div>
+            </div>
+            <div class="control-group">
+              <label>Band Gain</label>
+              <input type="range" id="fx-eq-band-gain" min="-24" max="24" step="0.5" value="0">
+              <div class="value-display" id="fx-eq-band-gain-val">0 dB</div>
+            </div>
+          </div>
+          <div class="controls">
+            <div class="control-group">
+              <label>Band Q</label>
+              <input type="range" id="fx-eq-band-q" min="0.1" max="18" step="0.1" value="1">
+              <div class="value-display" id="fx-eq-band-q-val">1.0</div>
+            </div>
+            <div class="control-group">
+              <label>Shelf Freq</label>
+              <input type="range" id="fx-eq-shelf-freq" min="1000" max="16000" step="100" value="8000">
+              <div class="value-display" id="fx-eq-shelf-freq-val">8000 Hz</div>
+            </div>
+            <div class="control-group">
+              <label>Shelf Gain</label>
+              <input type="range" id="fx-eq-shelf-gain" min="-12" max="12" step="0.5" value="0">
+              <div class="value-display" id="fx-eq-shelf-gain-val">0 dB</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Chorus -->
+      <div class="fx-unit" id="fx-chorus">
+        <div class="fx-unit-header">
+          <span class="fx-unit-label">Chorus</span>
+          <button class="fx-toggle off" id="fx-chorus-toggle">OFF</button>
+        </div>
+        <div class="fx-unit-body">
+          <div class="controls">
+            <div class="control-group">
+              <label>Rate (Hz)</label>
+              <input type="range" id="fx-chorus-rate" min="0.1" max="5" step="0.1" value="0.8">
+              <div class="value-display" id="fx-chorus-rate-val">0.8</div>
+            </div>
+            <div class="control-group">
+              <label>Depth (ms)</label>
+              <input type="range" id="fx-chorus-depth" min="0" max="20" step="0.5" value="2">
+              <div class="value-display" id="fx-chorus-depth-val">2.0</div>
+            </div>
+            <div class="control-group">
+              <label>Delay (ms)</label>
+              <input type="range" id="fx-chorus-delay" min="1" max="30" step="0.5" value="10">
+              <div class="value-display" id="fx-chorus-delay-val">10.0</div>
+            </div>
+          </div>
+          <div class="controls">
+            <div class="control-group">
+              <label>Spread</label>
+              <input type="range" id="fx-chorus-spread" min="0" max="100" step="1" value="50">
+              <div class="value-display" id="fx-chorus-spread-val">50%</div>
+            </div>
+            <div class="control-group">
+              <label>Mix</label>
+              <input type="range" id="fx-chorus-mix" min="0" max="1" step="0.01" value="0.5">
+              <div class="value-display" id="fx-chorus-mix-val">0.50</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Delay -->
+      <div class="fx-unit" id="fx-delay">
+        <div class="fx-unit-header">
+          <span class="fx-unit-label">Delay</span>
+          <button class="fx-toggle off" id="fx-delay-toggle">OFF</button>
+        </div>
+        <div class="fx-unit-body">
+          <div class="controls">
+            <div class="control-group">
+              <label>Time (ms)</label>
+              <input type="range" id="fx-delay-time" min="1" max="2000" step="1" value="300">
+              <div class="value-display" id="fx-delay-time-val">300</div>
+            </div>
+            <div class="control-group">
+              <label>Feedback</label>
+              <input type="range" id="fx-delay-feedback" min="0" max="0.95" step="0.01" value="0.3">
+              <div class="value-display" id="fx-delay-feedback-val">0.30</div>
+            </div>
+            <div class="control-group">
+              <label>Mix</label>
+              <input type="range" id="fx-delay-mix" min="0" max="1" step="0.01" value="0.3">
+              <div class="value-display" id="fx-delay-mix-val">0.30</div>
+            </div>
+          </div>
+          <div class="controls">
+            <div class="control-group">
+              <label>Ping-Pong</label>
+              <button class="fx-toggle off" id="fx-delay-pp">OFF</button>
+            </div>
+            <div class="control-group">
+              <label>Filter</label>
+              <input type="range" id="fx-delay-filter" min="200" max="12000" step="100" value="5000">
+              <div class="value-display" id="fx-delay-filter-val">5000 Hz</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Reverb -->
+      <div class="fx-unit" id="fx-reverb">
+        <div class="fx-unit-header">
+          <span class="fx-unit-label">Reverb</span>
+          <button class="fx-toggle off" id="fx-reverb-toggle">OFF</button>
+        </div>
+        <div class="fx-unit-body">
+          <div class="controls">
+            <div class="control-group">
+              <label>Size (s)</label>
+              <input type="range" id="fx-reverb-size" min="0.1" max="8" step="0.1" value="2">
+              <div class="value-display" id="fx-reverb-size-val">2.0</div>
+            </div>
+            <div class="control-group">
+              <label>Pre-delay (ms)</label>
+              <input type="range" id="fx-reverb-predelay" min="0" max="100" step="1" value="10">
+              <div class="value-display" id="fx-reverb-predelay-val">10</div>
+            </div>
+          </div>
+          <div class="controls">
+            <div class="control-group">
+              <label>Damping</label>
+              <input type="range" id="fx-reverb-damping" min="1000" max="16000" step="100" value="8000">
+              <div class="value-display" id="fx-reverb-damping-val">8000 Hz</div>
+            </div>
+            <div class="control-group">
+              <label>Mix</label>
+              <input type="range" id="fx-reverb-mix" min="0" max="1" step="0.01" value="0.3">
+              <div class="value-display" id="fx-reverb-mix-val">0.30</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Compressor -->
+      <div class="fx-unit" id="fx-compressor">
+        <div class="fx-unit-header">
+          <span class="fx-unit-label">Compressor</span>
+          <button class="fx-toggle off" id="fx-compressor-toggle">OFF</button>
+        </div>
+        <div class="fx-unit-body">
+          <div class="controls">
+            <div class="control-group">
+              <label>Threshold</label>
+              <input type="range" id="fx-comp-threshold" min="-60" max="0" step="1" value="-24">
+              <div class="value-display" id="fx-comp-threshold-val">-24 dB</div>
+            </div>
+            <div class="control-group">
+              <label>Ratio</label>
+              <input type="range" id="fx-comp-ratio" min="1" max="20" step="0.5" value="4">
+              <div class="value-display" id="fx-comp-ratio-val">4.0</div>
+            </div>
+            <div class="control-group">
+              <label>Attack</label>
+              <input type="range" id="fx-comp-attack" min="0.001" max="0.1" step="0.001" value="0.003">
+              <div class="value-display" id="fx-comp-attack-val">3 ms</div>
+            </div>
+          </div>
+          <div class="controls">
+            <div class="control-group">
+              <label>Release</label>
+              <input type="range" id="fx-comp-release" min="0.01" max="1" step="0.01" value="0.25">
+              <div class="value-display" id="fx-comp-release-val">250 ms</div>
+            </div>
+            <div class="control-group">
+              <label>Makeup (dB)</label>
+              <input type="range" id="fx-comp-makeup" min="0" max="24" step="0.5" value="0">
+              <div class="value-display" id="fx-comp-makeup-val">0.0 dB</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
     </div>
   </div>
 

@@ -5,6 +5,8 @@ import { createWaveformDisplay } from './modules/waveform-display.js';
 import { LFO } from './modules/lfo.js';
 import { createSync } from './modules/sync.js';
 import { createFXChain } from './modules/fx/fx-chain.js';
+import { createWaveformPreview } from './modules/waveform-preview.js';
+import { createKnob } from './modules/knob.js';
 
 // --- Sync ---
 const sync = createSync();
@@ -137,6 +139,8 @@ masterVolumeSlider.addEventListener('input', () => {
 });
 
 // --- Per-oscillator controls ---
+const detuneKnobs = [];
+
 function bindOscControls(voiceIndex, prefix) {
   const voice = engine.voices[voiceIndex];
   const section = document.getElementById(`${prefix}-section`);
@@ -144,8 +148,28 @@ function bindOscControls(voiceIndex, prefix) {
   const waveformSel = document.getElementById(`waveform${voiceIndex + 1}`);
   const volumeSlider = document.getElementById(`volume${voiceIndex + 1}`);
   const volumeVal = document.getElementById(`volume${voiceIndex + 1}-val`);
-  const detuneSlider = document.getElementById(`detune${voiceIndex + 1}`);
+  const detuneInput = document.getElementById(`detune${voiceIndex + 1}`);
   const detuneVal = document.getElementById(`detune${voiceIndex + 1}-val`);
+
+  // Waveform preview
+  const wfPreview = createWaveformPreview(
+    document.getElementById(`waveform${voiceIndex + 1}-preview`)
+  );
+  wfPreview.setWaveform(waveformSel.value);
+
+  // Detune knob
+  const knob = createKnob(
+    document.getElementById(`detune${voiceIndex + 1}-knob`),
+    detuneInput,
+    {
+      min: -100, max: 100, step: 1, value: 0,
+      onChange(v) {
+        detuneVal.textContent = Math.round(v);
+        voice.setDetune(v);
+      }
+    }
+  );
+  detuneKnobs[voiceIndex] = knob;
 
   toggle.addEventListener('click', (e) => {
     e.stopPropagation();
@@ -159,6 +183,7 @@ function bindOscControls(voiceIndex, prefix) {
 
   waveformSel.addEventListener('change', () => {
     voice.setWaveform(waveformSel.value);
+    wfPreview.setWaveform(waveformSel.value);
   });
 
   volumeSlider.addEventListener('input', () => {
@@ -167,9 +192,9 @@ function bindOscControls(voiceIndex, prefix) {
     voice.setVolume(vol);
   });
 
-  detuneSlider.addEventListener('input', () => {
-    const cents = parseFloat(detuneSlider.value);
-    detuneVal.textContent = detuneSlider.value;
+  detuneInput.addEventListener('input', () => {
+    const cents = parseFloat(detuneInput.value);
+    detuneVal.textContent = Math.round(cents);
     voice.setDetune(cents);
   });
 
@@ -239,8 +264,15 @@ function bindLFOControls(lfoIndex) {
   const divisionSelect = document.getElementById(`lfo-division${n}`);
   const oneshotToggle = document.getElementById(`lfo-oneshot${n}`);
 
+  // LFO waveform preview
+  const lfoWfPreview = createWaveformPreview(
+    document.getElementById(`lfo-waveform${n}-preview`)
+  );
+  lfoWfPreview.setWaveform(waveformSel.value);
+
   waveformSel.addEventListener('change', () => {
     lfo.waveform = waveformSel.value;
+    lfoWfPreview.setWaveform(waveformSel.value);
   });
 
   rateSlider.addEventListener('input', () => {
@@ -642,6 +674,9 @@ sync.onMessage((msg) => {
     const el = document.getElementById(msg.id);
     if (!el) return;
     el.value = msg.v;
+    // Update knob visual if this is a detune hidden input
+    if (msg.id === 'detune1') detuneKnobs[0]?.setValue(parseFloat(msg.v));
+    if (msg.id === 'detune2') detuneKnobs[1]?.setValue(parseFloat(msg.v));
     const evt = el.tagName === 'SELECT' ? 'change' : 'input';
     el.dispatchEvent(new Event(evt, { bubbles: true }));
   } else if (msg.t === 'click') {

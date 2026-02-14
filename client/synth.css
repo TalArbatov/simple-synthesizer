@@ -597,6 +597,24 @@ input[type="range"]::-webkit-slider-thumb {
   color: #111;
 }
 
+/* ── Waveform preview ── */
+.waveform-preview {
+  display: block;
+  margin-top: 4px;
+  border-radius: 4px;
+}
+
+/* ── Rotary knob ── */
+.knob-canvas {
+  display: block;
+  margin: 0 auto;
+  cursor: grab;
+}
+
+.knob-canvas:active {
+  cursor: grabbing;
+}
+
 /* ── Hint ── */
 .hint {
   text-align: center;

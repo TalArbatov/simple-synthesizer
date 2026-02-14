@@ -60,7 +60,20 @@ export class OscillatorVoice {
   }
 
   setVolume(vol) {
+    const oldVol = this.volume;
     this.volume = vol;
+    const now = this.audioCtx.currentTime;
+    for (const note of this.activeNotes.values()) {
+      const N = note.oscillators.length;
+      const oldScaled = oldVol / Math.sqrt(N);
+      const newScaled = vol / Math.sqrt(N);
+      const g = note.gainNode.gain;
+      g.cancelScheduledValues(now);
+      const current = g.value;
+      // Scale proportionally: preserve ADSR envelope position
+      const ratio = oldScaled > 0 ? current / oldScaled : 0;
+      g.setValueAtTime(newScaled * ratio, now);
+    }
   }
 
   setFilterEnabled(enabled) {

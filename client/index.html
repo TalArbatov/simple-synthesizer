@@ -45,6 +45,7 @@
                 <option value="sawtooth" selected>Sawtooth</option>
                 <option value="square">Square</option>
               </select>
+              <canvas class="waveform-preview" id="waveform1-preview" width="120" height="30"></canvas>
             </div>
             <div class="control-group">
               <label>Volume</label>
@@ -53,7 +54,8 @@
             </div>
             <div class="control-group">
               <label>Detune (cents)</label>
-              <input type="range" id="detune1" min="-100" max="100" step="1" value="0">
+              <canvas class="knob-canvas" id="detune1-knob" width="60" height="70"></canvas>
+              <input type="hidden" id="detune1" value="0">
               <div class="value-display" id="detune1-val">0</div>
             </div>
           </div>
@@ -88,6 +90,7 @@
                   <option value="square">Square</option>
                   <option value="sawtooth">Sawtooth</option>
                 </select>
+                <canvas class="waveform-preview" id="lfo-waveform1-preview" width="120" height="30"></canvas>
               </div>
               <div class="control-group">
                 <label>Rate (Hz)</label>
@@ -164,6 +167,7 @@
                 <option value="sawtooth">Sawtooth</option>
                 <option value="square">Square</option>
               </select>
+              <canvas class="waveform-preview" id="waveform2-preview" width="120" height="30"></canvas>
             </div>
             <div class="control-group">
               <label>Volume</label>
@@ -172,7 +176,8 @@
             </div>
             <div class="control-group">
               <label>Detune (cents)</label>
-              <input type="range" id="detune2" min="-100" max="100" step="1" value="0">
+              <canvas class="knob-canvas" id="detune2-knob" width="60" height="70"></canvas>
+              <input type="hidden" id="detune2" value="0">
               <div class="value-display" id="detune2-val">0</div>
             </div>
           </div>
@@ -207,6 +212,7 @@
                   <option value="square">Square</option>
                   <option value="sawtooth">Sawtooth</option>
                 </select>
+                <canvas class="waveform-preview" id="lfo-waveform2-preview" width="120" height="30"></canvas>
               </div>
               <div class="control-group">
                 <label>Rate (Hz)</label>

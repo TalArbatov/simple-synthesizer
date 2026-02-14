@@ -8,6 +8,7 @@ import type {
   ReverbParams,
   SaturationParams,
 } from '../../modules/types.js';
+import { KnobControl } from './KnobControl';
 
 type ToggleState = {
   saturation: boolean;
@@ -210,73 +211,65 @@ export function FxPage({ runtime, active }: { runtime: SynthRuntime | null; acti
               </div>
               <div className="control-group">
                 <label>Drive</label>
-                <input
-                  type="range"
+                <KnobControl
                   id="fx-sat-drive"
-                  min="1"
-                  max="100"
-                  step="1"
+                  min={1}
+                  max={100}
+                  step={1}
                   value={values.satDrive}
-                  onChange={(e) => {
-                    const v = parseFloat(e.target.value);
+                  displayValue={`${Math.round(values.satDrive)}`}
+                  onValueChange={(v) => {
                     setParam('satDrive', v);
                     applySat({ drive: v });
                   }}
                 />
-                <div className="value-display" id="fx-sat-drive-val">{values.satDrive}</div>
               </div>
               <div className="control-group">
                 <label>Output</label>
-                <input
-                  type="range"
+                <KnobControl
                   id="fx-sat-output"
-                  min="0"
-                  max="1"
-                  step="0.01"
+                  min={0}
+                  max={1}
+                  step={0.01}
                   value={values.satOutput}
-                  onChange={(e) => {
-                    const v = parseFloat(e.target.value);
+                  displayValue={values.satOutput.toFixed(2)}
+                  onValueChange={(v) => {
                     setParam('satOutput', v);
                     applySat({ output: v });
                   }}
                 />
-                <div className="value-display" id="fx-sat-output-val">{values.satOutput.toFixed(2)}</div>
               </div>
             </div>
             <div className="controls">
               <div className="control-group">
                 <label>Tone</label>
-                <input
-                  type="range"
+                <KnobControl
                   id="fx-sat-tone"
-                  min="200"
-                  max="8000"
-                  step="10"
+                  min={200}
+                  max={8000}
+                  step={10}
                   value={values.satTone}
-                  onChange={(e) => {
-                    const v = parseFloat(e.target.value);
+                  displayValue={`${Math.round(values.satTone)} Hz`}
+                  onValueChange={(v) => {
                     setParam('satTone', v);
                     applySat({ tone: v });
                   }}
                 />
-                <div className="value-display" id="fx-sat-tone-val">{values.satTone} Hz</div>
               </div>
               <div className="control-group">
                 <label>Mix</label>
-                <input
-                  type="range"
+                <KnobControl
                   id="fx-sat-mix"
-                  min="0"
-                  max="1"
-                  step="0.01"
+                  min={0}
+                  max={1}
+                  step={0.01}
                   value={values.satMix}
-                  onChange={(e) => {
-                    const v = parseFloat(e.target.value);
+                  displayValue={values.satMix.toFixed(2)}
+                  onValueChange={(v) => {
                     setParam('satMix', v);
                     applySat({ mix: v });
                   }}
                 />
-                <div className="value-display" id="fx-sat-mix-val">{values.satMix.toFixed(2)}</div>
               </div>
             </div>
           </div>
@@ -297,107 +290,95 @@ export function FxPage({ runtime, active }: { runtime: SynthRuntime | null; acti
             <div className="controls">
               <div className="control-group">
                 <label>HP Freq</label>
-                <input
-                  type="range"
+                <KnobControl
                   id="fx-eq-hp"
-                  min="20"
-                  max="2000"
-                  step="1"
+                  min={20}
+                  max={2000}
+                  step={1}
                   value={values.eqHp}
-                  onChange={(e) => {
-                    const v = parseFloat(e.target.value);
+                  displayValue={`${Math.round(values.eqHp)} Hz`}
+                  onValueChange={(v) => {
                     setParam('eqHp', v);
                     applyEq({ hpFreq: v });
                   }}
                 />
-                <div className="value-display" id="fx-eq-hp-val">{values.eqHp} Hz</div>
               </div>
               <div className="control-group">
                 <label>Band Freq</label>
-                <input
-                  type="range"
+                <KnobControl
                   id="fx-eq-band-freq"
-                  min="100"
-                  max="10000"
-                  step="10"
+                  min={100}
+                  max={10000}
+                  step={10}
                   value={values.eqBandFreq}
-                  onChange={(e) => {
-                    const v = parseFloat(e.target.value);
+                  displayValue={`${Math.round(values.eqBandFreq)} Hz`}
+                  onValueChange={(v) => {
                     setParam('eqBandFreq', v);
                     applyEq({ bandFreq: v });
                   }}
                 />
-                <div className="value-display" id="fx-eq-band-freq-val">{values.eqBandFreq} Hz</div>
               </div>
               <div className="control-group">
                 <label>Band Gain</label>
-                <input
-                  type="range"
+                <KnobControl
                   id="fx-eq-band-gain"
-                  min="-24"
-                  max="24"
-                  step="0.5"
+                  min={-24}
+                  max={24}
+                  step={0.5}
                   value={values.eqBandGain}
-                  onChange={(e) => {
-                    const v = parseFloat(e.target.value);
+                  displayValue={`${values.eqBandGain.toFixed(1)} dB`}
+                  onValueChange={(v) => {
                     setParam('eqBandGain', v);
                     applyEq({ bandGain: v });
                   }}
                 />
-                <div className="value-display" id="fx-eq-band-gain-val">{values.eqBandGain} dB</div>
               </div>
             </div>
             <div className="controls">
               <div className="control-group">
                 <label>Band Q</label>
-                <input
-                  type="range"
+                <KnobControl
                   id="fx-eq-band-q"
-                  min="0.1"
-                  max="18"
-                  step="0.1"
+                  min={0.1}
+                  max={18}
+                  step={0.1}
                   value={values.eqBandQ}
-                  onChange={(e) => {
-                    const v = parseFloat(e.target.value);
+                  displayValue={values.eqBandQ.toFixed(1)}
+                  onValueChange={(v) => {
                     setParam('eqBandQ', v);
                     applyEq({ bandQ: v });
                   }}
                 />
-                <div className="value-display" id="fx-eq-band-q-val">{values.eqBandQ.toFixed(1)}</div>
               </div>
               <div className="control-group">
                 <label>Shelf Freq</label>
-                <input
-                  type="range"
+                <KnobControl
                   id="fx-eq-shelf-freq"
-                  min="1000"
-                  max="16000"
-                  step="100"
+                  min={1000}
+                  max={16000}
+                  step={100}
                   value={values.eqShelfFreq}
-                  onChange={(e) => {
-                    const v = parseFloat(e.target.value);
+                  displayValue={`${Math.round(values.eqShelfFreq)} Hz`}
+                  onValueChange={(v) => {
                     setParam('eqShelfFreq', v);
                     applyEq({ shelfFreq: v });
                   }}
                 />
-                <div className="value-display" id="fx-eq-shelf-freq-val">{values.eqShelfFreq} Hz</div>
               </div>
               <div className="control-group">
                 <label>Shelf Gain</label>
-                <input
-                  type="range"
+                <KnobControl
                   id="fx-eq-shelf-gain"
-                  min="-12"
-                  max="12"
-                  step="0.5"
+                  min={-12}
+                  max={12}
+                  step={0.5}
                   value={values.eqShelfGain}
-                  onChange={(e) => {
-                    const v = parseFloat(e.target.value);
+                  displayValue={`${values.eqShelfGain.toFixed(1)} dB`}
+                  onValueChange={(v) => {
                     setParam('eqShelfGain', v);
                     applyEq({ shelfGain: v });
                   }}
                 />
-                <div className="value-display" id="fx-eq-shelf-gain-val">{values.eqShelfGain} dB</div>
               </div>
             </div>
             <canvas className="fx-eq-canvas" id="fx-eq-canvas" width="560" height="120"></canvas>
@@ -419,30 +400,25 @@ export function FxPage({ runtime, active }: { runtime: SynthRuntime | null; acti
             <div className="controls">
               <div className="control-group">
                 <label>Rate (Hz)</label>
-                <input type="range" id="fx-chorus-rate" min="0.1" max="5" step="0.1" value={values.chorusRate} onChange={(e) => { const v = parseFloat(e.target.value); setParam('chorusRate', v); applyChorus({ rate: v }); }} />
-                <div className="value-display" id="fx-chorus-rate-val">{values.chorusRate.toFixed(1)}</div>
+                <KnobControl id="fx-chorus-rate" min={0.1} max={5} step={0.1} value={values.chorusRate} displayValue={values.chorusRate.toFixed(1)} onValueChange={(v) => { setParam('chorusRate', v); applyChorus({ rate: v }); }} />
               </div>
               <div className="control-group">
                 <label>Depth (ms)</label>
-                <input type="range" id="fx-chorus-depth" min="0" max="20" step="0.5" value={values.chorusDepth} onChange={(e) => { const v = parseFloat(e.target.value); setParam('chorusDepth', v); applyChorus({ depth: v }); }} />
-                <div className="value-display" id="fx-chorus-depth-val">{values.chorusDepth.toFixed(1)}</div>
+                <KnobControl id="fx-chorus-depth" min={0} max={20} step={0.5} value={values.chorusDepth} displayValue={values.chorusDepth.toFixed(1)} onValueChange={(v) => { setParam('chorusDepth', v); applyChorus({ depth: v }); }} />
               </div>
               <div className="control-group">
                 <label>Delay (ms)</label>
-                <input type="range" id="fx-chorus-delay" min="1" max="30" step="0.5" value={values.chorusDelay} onChange={(e) => { const v = parseFloat(e.target.value); setParam('chorusDelay', v); applyChorus({ delay: v }); }} />
-                <div className="value-display" id="fx-chorus-delay-val">{values.chorusDelay.toFixed(1)}</div>
+                <KnobControl id="fx-chorus-delay" min={1} max={30} step={0.5} value={values.chorusDelay} displayValue={values.chorusDelay.toFixed(1)} onValueChange={(v) => { setParam('chorusDelay', v); applyChorus({ delay: v }); }} />
               </div>
             </div>
             <div className="controls">
               <div className="control-group">
                 <label>Spread</label>
-                <input type="range" id="fx-chorus-spread" min="0" max="100" step="1" value={values.chorusSpread} onChange={(e) => { const v = parseFloat(e.target.value); setParam('chorusSpread', v); applyChorus({ spread: v }); }} />
-                <div className="value-display" id="fx-chorus-spread-val">{values.chorusSpread}%</div>
+                <KnobControl id="fx-chorus-spread" min={0} max={100} step={1} value={values.chorusSpread} displayValue={`${Math.round(values.chorusSpread)}%`} onValueChange={(v) => { setParam('chorusSpread', v); applyChorus({ spread: v }); }} />
               </div>
               <div className="control-group">
                 <label>Mix</label>
-                <input type="range" id="fx-chorus-mix" min="0" max="1" step="0.01" value={values.chorusMix} onChange={(e) => { const v = parseFloat(e.target.value); setParam('chorusMix', v); applyChorus({ mix: v }); }} />
-                <div className="value-display" id="fx-chorus-mix-val">{values.chorusMix.toFixed(2)}</div>
+                <KnobControl id="fx-chorus-mix" min={0} max={1} step={0.01} value={values.chorusMix} displayValue={values.chorusMix.toFixed(2)} onValueChange={(v) => { setParam('chorusMix', v); applyChorus({ mix: v }); }} />
               </div>
             </div>
           </div>
@@ -463,18 +439,15 @@ export function FxPage({ runtime, active }: { runtime: SynthRuntime | null; acti
             <div className="controls">
               <div className="control-group">
                 <label>Time (ms)</label>
-                <input type="range" id="fx-delay-time" min="1" max="2000" step="1" value={values.delayTime} onChange={(e) => { const v = parseFloat(e.target.value); setParam('delayTime', v); applyDelay({ time: v }); }} />
-                <div className="value-display" id="fx-delay-time-val">{values.delayTime}</div>
+                <KnobControl id="fx-delay-time" min={1} max={2000} step={1} value={values.delayTime} displayValue={`${Math.round(values.delayTime)}`} onValueChange={(v) => { setParam('delayTime', v); applyDelay({ time: v }); }} />
               </div>
               <div className="control-group">
                 <label>Feedback</label>
-                <input type="range" id="fx-delay-feedback" min="0" max="0.95" step="0.01" value={values.delayFeedback} onChange={(e) => { const v = parseFloat(e.target.value); setParam('delayFeedback', v); applyDelay({ feedback: v }); }} />
-                <div className="value-display" id="fx-delay-feedback-val">{values.delayFeedback.toFixed(2)}</div>
+                <KnobControl id="fx-delay-feedback" min={0} max={0.95} step={0.01} value={values.delayFeedback} displayValue={values.delayFeedback.toFixed(2)} onValueChange={(v) => { setParam('delayFeedback', v); applyDelay({ feedback: v }); }} />
               </div>
               <div className="control-group">
                 <label>Mix</label>
-                <input type="range" id="fx-delay-mix" min="0" max="1" step="0.01" value={values.delayMix} onChange={(e) => { const v = parseFloat(e.target.value); setParam('delayMix', v); applyDelay({ mix: v }); }} />
-                <div className="value-display" id="fx-delay-mix-val">{values.delayMix.toFixed(2)}</div>
+                <KnobControl id="fx-delay-mix" min={0} max={1} step={0.01} value={values.delayMix} displayValue={values.delayMix.toFixed(2)} onValueChange={(v) => { setParam('delayMix', v); applyDelay({ mix: v }); }} />
               </div>
             </div>
             <div className="controls">
@@ -494,8 +467,7 @@ export function FxPage({ runtime, active }: { runtime: SynthRuntime | null; acti
               </div>
               <div className="control-group">
                 <label>Filter</label>
-                <input type="range" id="fx-delay-filter" min="200" max="12000" step="100" value={values.delayFilter} onChange={(e) => { const v = parseFloat(e.target.value); setParam('delayFilter', v); applyDelay({ filterFreq: v }); }} />
-                <div className="value-display" id="fx-delay-filter-val">{values.delayFilter} Hz</div>
+                <KnobControl id="fx-delay-filter" min={200} max={12000} step={100} value={values.delayFilter} displayValue={`${Math.round(values.delayFilter)} Hz`} onValueChange={(v) => { setParam('delayFilter', v); applyDelay({ filterFreq: v }); }} />
               </div>
             </div>
           </div>
@@ -516,25 +488,21 @@ export function FxPage({ runtime, active }: { runtime: SynthRuntime | null; acti
             <div className="controls">
               <div className="control-group">
                 <label>Size (s)</label>
-                <input type="range" id="fx-reverb-size" min="0.1" max="8" step="0.1" value={values.reverbSize} onChange={(e) => { const v = parseFloat(e.target.value); setParam('reverbSize', v); applyReverb({ size: v }); }} />
-                <div className="value-display" id="fx-reverb-size-val">{values.reverbSize.toFixed(1)}</div>
+                <KnobControl id="fx-reverb-size" min={0.1} max={8} step={0.1} value={values.reverbSize} displayValue={values.reverbSize.toFixed(1)} onValueChange={(v) => { setParam('reverbSize', v); applyReverb({ size: v }); }} />
               </div>
               <div className="control-group">
                 <label>Pre-delay (ms)</label>
-                <input type="range" id="fx-reverb-predelay" min="0" max="100" step="1" value={values.reverbPredelay} onChange={(e) => { const v = parseFloat(e.target.value); setParam('reverbPredelay', v); applyReverb({ preDelay: v }); }} />
-                <div className="value-display" id="fx-reverb-predelay-val">{values.reverbPredelay}</div>
+                <KnobControl id="fx-reverb-predelay" min={0} max={100} step={1} value={values.reverbPredelay} displayValue={`${Math.round(values.reverbPredelay)}`} onValueChange={(v) => { setParam('reverbPredelay', v); applyReverb({ preDelay: v }); }} />
               </div>
             </div>
             <div className="controls">
               <div className="control-group">
                 <label>Damping</label>
-                <input type="range" id="fx-reverb-damping" min="1000" max="16000" step="100" value={values.reverbDamping} onChange={(e) => { const v = parseFloat(e.target.value); setParam('reverbDamping', v); applyReverb({ damping: v }); }} />
-                <div className="value-display" id="fx-reverb-damping-val">{values.reverbDamping} Hz</div>
+                <KnobControl id="fx-reverb-damping" min={1000} max={16000} step={100} value={values.reverbDamping} displayValue={`${Math.round(values.reverbDamping)} Hz`} onValueChange={(v) => { setParam('reverbDamping', v); applyReverb({ damping: v }); }} />
               </div>
               <div className="control-group">
                 <label>Mix</label>
-                <input type="range" id="fx-reverb-mix" min="0" max="1" step="0.01" value={values.reverbMix} onChange={(e) => { const v = parseFloat(e.target.value); setParam('reverbMix', v); applyReverb({ mix: v }); }} />
-                <div className="value-display" id="fx-reverb-mix-val">{values.reverbMix.toFixed(2)}</div>
+                <KnobControl id="fx-reverb-mix" min={0} max={1} step={0.01} value={values.reverbMix} displayValue={values.reverbMix.toFixed(2)} onValueChange={(v) => { setParam('reverbMix', v); applyReverb({ mix: v }); }} />
               </div>
             </div>
           </div>
@@ -555,30 +523,25 @@ export function FxPage({ runtime, active }: { runtime: SynthRuntime | null; acti
             <div className="controls">
               <div className="control-group">
                 <label>Threshold</label>
-                <input type="range" id="fx-comp-threshold" min="-60" max="0" step="1" value={values.compThreshold} onChange={(e) => { const v = parseFloat(e.target.value); setParam('compThreshold', v); applyComp({ threshold: v }); }} />
-                <div className="value-display" id="fx-comp-threshold-val">{values.compThreshold} dB</div>
+                <KnobControl id="fx-comp-threshold" min={-60} max={0} step={1} value={values.compThreshold} displayValue={`${Math.round(values.compThreshold)} dB`} onValueChange={(v) => { setParam('compThreshold', v); applyComp({ threshold: v }); }} />
               </div>
               <div className="control-group">
                 <label>Ratio</label>
-                <input type="range" id="fx-comp-ratio" min="1" max="20" step="0.5" value={values.compRatio} onChange={(e) => { const v = parseFloat(e.target.value); setParam('compRatio', v); applyComp({ ratio: v }); }} />
-                <div className="value-display" id="fx-comp-ratio-val">{values.compRatio.toFixed(1)}</div>
+                <KnobControl id="fx-comp-ratio" min={1} max={20} step={0.5} value={values.compRatio} displayValue={values.compRatio.toFixed(1)} onValueChange={(v) => { setParam('compRatio', v); applyComp({ ratio: v }); }} />
               </div>
               <div className="control-group">
                 <label>Attack</label>
-                <input type="range" id="fx-comp-attack" min="0.001" max="0.1" step="0.001" value={values.compAttack} onChange={(e) => { const v = parseFloat(e.target.value); setParam('compAttack', v); applyComp({ attack: v }); }} />
-                <div className="value-display" id="fx-comp-attack-val">{Math.round(values.compAttack * 1000)} ms</div>
+                <KnobControl id="fx-comp-attack" min={0.001} max={0.1} step={0.001} value={values.compAttack} displayValue={`${Math.round(values.compAttack * 1000)} ms`} onValueChange={(v) => { setParam('compAttack', v); applyComp({ attack: v }); }} />
               </div>
             </div>
             <div className="controls">
               <div className="control-group">
                 <label>Release</label>
-                <input type="range" id="fx-comp-release" min="0.01" max="1" step="0.01" value={values.compRelease} onChange={(e) => { const v = parseFloat(e.target.value); setParam('compRelease', v); applyComp({ release: v }); }} />
-                <div className="value-display" id="fx-comp-release-val">{Math.round(values.compRelease * 1000)} ms</div>
+                <KnobControl id="fx-comp-release" min={0.01} max={1} step={0.01} value={values.compRelease} displayValue={`${Math.round(values.compRelease * 1000)} ms`} onValueChange={(v) => { setParam('compRelease', v); applyComp({ release: v }); }} />
               </div>
               <div className="control-group">
                 <label>Makeup (dB)</label>
-                <input type="range" id="fx-comp-makeup" min="0" max="24" step="0.5" value={values.compMakeup} onChange={(e) => { const v = parseFloat(e.target.value); setParam('compMakeup', v); applyComp({ makeup: v }); }} />
-                <div className="value-display" id="fx-comp-makeup-val">{values.compMakeup.toFixed(1)} dB</div>
+                <KnobControl id="fx-comp-makeup" min={0} max={24} step={0.5} value={values.compMakeup} displayValue={`${values.compMakeup.toFixed(1)} dB`} onValueChange={(v) => { setParam('compMakeup', v); applyComp({ makeup: v }); }} />
               </div>
             </div>
           </div>
@@ -587,4 +550,3 @@ export function FxPage({ runtime, active }: { runtime: SynthRuntime | null; acti
     </div>
   );
 }
-

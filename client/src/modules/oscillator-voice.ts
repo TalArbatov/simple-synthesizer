@@ -327,6 +327,47 @@ export class OscillatorVoice {
     }
   }
 
+  applyModulatedVolume(volume: number): void {
+    const now = this.audioCtx.currentTime;
+    for (const note of this.activeNotes.values()) {
+      const n = note.oscillators.length || 1;
+      note.gainNode.gain.setValueAtTime(volume / Math.sqrt(n) * (note.envRatio ?? 1), now);
+    }
+  }
+
+  applyModulatedDetune(cents: number): void {
+    const now = this.audioCtx.currentTime;
+    for (const note of this.activeNotes.values()) {
+      const n = note.oscillators.length;
+      for (let i = 0; i < n; i++) {
+        const unisonOffset = n > 1 ? this.unisonDetune * (2 * i / (n - 1) - 1) : 0;
+        note.oscillators[i].detune.setValueAtTime(cents + unisonOffset, now);
+      }
+    }
+  }
+
+  applyModulatedUnisonDetune(cents: number): void {
+    const now = this.audioCtx.currentTime;
+    for (const note of this.activeNotes.values()) {
+      const n = note.oscillators.length;
+      for (let i = 0; i < n; i++) {
+        const unisonOffset = n > 1 ? cents * (2 * i / (n - 1) - 1) : 0;
+        note.oscillators[i].detune.setValueAtTime(this.detune + unisonOffset, now);
+      }
+    }
+  }
+
+  applyModulatedUnisonSpread(spread: number): void {
+    const now = this.audioCtx.currentTime;
+    for (const note of this.activeNotes.values()) {
+      const n = note.panners.length;
+      for (let i = 0; i < n; i++) {
+        const pan = n > 1 ? spread * (2 * i / (n - 1) - 1) : 0;
+        note.panners[i].pan.setValueAtTime(pan, now);
+      }
+    }
+  }
+
   noteOff(freq: number): void {
     const note = this.activeNotes.get(freq);
     if (!note) return;

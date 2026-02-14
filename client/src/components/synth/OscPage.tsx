@@ -1,10 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 import type { SynthRuntime } from '../../application/synth/runtime.js';
-import { createKnob } from '../../modules/knob.js';
-import { registerKnob } from '../../modules/knob-registry.js';
 import type { LFODivision, LFOTarget, LFOWaveform } from '../../modules/lfo.js';
 import { createWaveformPreview } from '../../modules/waveform-preview.js';
+import { KnobControl } from './KnobControl';
 
 type OscUIState = {
   enabled: boolean;
@@ -36,8 +35,16 @@ type DragSource = {
   osc: 1 | 2;
   lfo: 1 | 2 | 3 | 4;
 };
+type OscDropTarget = Exclude<LFOTarget, 'volume'>;
 
 const LFO_DIVISIONS: LFODivision[] = ['1/1', '1/2', '1/4', '1/8', '1/16'];
+const OSC_TARGET_OPTIONS: Array<{ target: LFOTarget; label: string }> = [
+  { target: 'filter', label: 'Filter' },
+  { target: 'osc-volume', label: 'Osc Volume' },
+  { target: 'osc-detune', label: 'Detune' },
+  { target: 'osc-unison-detune', label: 'Unison Detune' },
+  { target: 'osc-unison-spread', label: 'Stereo Spread' },
+];
 
 const INITIAL_OSC: [OscUIState, OscUIState] = [
   {
@@ -92,11 +99,7 @@ function OscSection({
   state,
   hidden,
   lfoSection,
-  filterDropActive,
-  filterDropHover,
-  onFilterDragOver,
-  onFilterDragLeave,
-  onFilterDrop,
+  dropForTarget,
   onWaveform,
   onVolume,
   onDetuneInput,
@@ -110,11 +113,13 @@ function OscSection({
   state: OscUIState;
   hidden: boolean;
   lfoSection: ReactNode;
-  filterDropActive: boolean;
-  filterDropHover: boolean;
-  onFilterDragOver: (e: React.DragEvent<HTMLElement>) => void;
-  onFilterDragLeave: () => void;
-  onFilterDrop: (e: React.DragEvent<HTMLElement>) => void;
+  dropForTarget: (target: OscDropTarget) => {
+    active: boolean;
+    hover: boolean;
+    onDragOver: (e: React.DragEvent<HTMLElement>) => void;
+    onDragLeave: () => void;
+    onDrop: (e: React.DragEvent<HTMLElement>) => void;
+  };
   onWaveform: (value: OscillatorType) => void;
   onVolume: (value: number) => void;
   onDetuneInput: (value: number) => void;
@@ -124,6 +129,12 @@ function OscSection({
   onFilterType: (value: BiquadFilterType) => void;
   onFilterToggle: () => void;
 }) {
+  const oscVolumeDrop = dropForTarget('osc-volume');
+  const oscDetuneDrop = dropForTarget('osc-detune');
+  const oscUnisonDetuneDrop = dropForTarget('osc-unison-detune');
+  const oscUnisonSpreadDrop = dropForTarget('osc-unison-spread');
+  const filterDrop = dropForTarget('filter');
+
   return (
     <div className={`osc-section${hidden ? ' hidden' : ''}${state.enabled ? '' : ' disabled'}`} id={`osc${n}-section`}>
       <div className="osc-content">
@@ -138,85 +149,101 @@ function OscSection({
             </select>
             <canvas className="waveform-preview" id={`waveform${n}-preview`} width="120" height="30"></canvas>
           </div>
-          <div className="control-group">
+          <div
+            className={`control-group${oscVolumeDrop.active ? ' drop-target-active' : ''}${oscVolumeDrop.hover ? ' drop-target-hover' : ''}`}
+            onDragOver={oscVolumeDrop.onDragOver}
+            onDragLeave={oscVolumeDrop.onDragLeave}
+            onDrop={oscVolumeDrop.onDrop}
+          >
             <label>Volume</label>
-            <input
-              type="range"
+            <KnobControl
               id={`volume${n}`}
-              min="0"
-              max="1"
-              step="0.01"
+              min={0}
+              max={1}
+              step={0.01}
               value={state.volume}
-              onChange={(e) => onVolume(parseFloat(e.target.value))}
+              displayValue={state.volume.toFixed(2)}
+              onValueChange={(value) => onVolume(value)}
             />
-            <div className="value-display" id={`volume${n}-val`}>{state.volume.toFixed(2)}</div>
           </div>
-          <div className="control-group">
+          <div
+            className={`control-group${oscDetuneDrop.active ? ' drop-target-active' : ''}${oscDetuneDrop.hover ? ' drop-target-hover' : ''}`}
+            onDragOver={oscDetuneDrop.onDragOver}
+            onDragLeave={oscDetuneDrop.onDragLeave}
+            onDrop={oscDetuneDrop.onDrop}
+          >
             <label>Detune (cents)</label>
-            <canvas className="knob-canvas" id={`detune${n}-knob`} width="48" height="56"></canvas>
-            <input
-              type="hidden"
+            <KnobControl
               id={`detune${n}`}
+              min={-100}
+              max={100}
+              step={1}
               value={state.detune}
-              onInput={(e) => onDetuneInput(parseFloat((e.target as HTMLInputElement).value))}
-              readOnly
+              displayValue={`${Math.round(state.detune)}`}
+              onValueChange={(value) => onDetuneInput(value)}
             />
-            <div className="value-display" id={`detune${n}-val`}>{Math.round(state.detune)}</div>
           </div>
         </div>
 
         <div className="controls">
           <div className="control-group">
             <label>Unison Voices</label>
-            <input
-              type="range"
+            <KnobControl
               id={`unison-count${n}`}
-              min="1"
-              max="8"
-              step="1"
+              min={1}
+              max={8}
+              step={1}
               value={state.unisonCount}
-              onChange={(e) => onUnisonCount(parseInt(e.target.value, 10))}
+              displayValue={`${state.unisonCount}`}
+              onValueChange={(value) => onUnisonCount(Math.round(value))}
             />
-            <div className="value-display" id={`unison-count${n}-val`}>{state.unisonCount}</div>
           </div>
-          <div className="control-group">
+          <div
+            className={`control-group${oscUnisonDetuneDrop.active ? ' drop-target-active' : ''}${oscUnisonDetuneDrop.hover ? ' drop-target-hover' : ''}`}
+            onDragOver={oscUnisonDetuneDrop.onDragOver}
+            onDragLeave={oscUnisonDetuneDrop.onDragLeave}
+            onDrop={oscUnisonDetuneDrop.onDrop}
+          >
             <label>Unison Detune</label>
-            <input
-              type="range"
+            <KnobControl
               id={`unison-detune${n}`}
-              min="0"
-              max="100"
-              step="1"
+              min={0}
+              max={100}
+              step={1}
               value={state.unisonDetune}
-              onChange={(e) => onUnisonDetune(parseFloat(e.target.value))}
+              displayValue={`${Math.round(state.unisonDetune)}`}
+              onValueChange={(value) => onUnisonDetune(value)}
             />
-            <div className="value-display" id={`unison-detune${n}-val`}>{state.unisonDetune}</div>
           </div>
-          <div className="control-group">
+          <div
+            className={`control-group${oscUnisonSpreadDrop.active ? ' drop-target-active' : ''}${oscUnisonSpreadDrop.hover ? ' drop-target-hover' : ''}`}
+            onDragOver={oscUnisonSpreadDrop.onDragOver}
+            onDragLeave={oscUnisonSpreadDrop.onDragLeave}
+            onDrop={oscUnisonSpreadDrop.onDrop}
+          >
             <label>Stereo Spread</label>
-            <input
-              type="range"
+            <KnobControl
               id={`unison-spread${n}`}
-              min="0"
-              max="100"
-              step="1"
+              min={0}
+              max={100}
+              step={1}
               value={state.unisonSpread}
-              onChange={(e) => onUnisonSpread(parseFloat(e.target.value))}
+              displayValue={`${Math.round(state.unisonSpread)}%`}
+              onValueChange={(value) => onUnisonSpread(value)}
             />
-            <div className="value-display" id={`unison-spread${n}-val`}>{state.unisonSpread}%</div>
           </div>
         </div>
 
         {lfoSection}
 
         <div
-          className={`filter-section${state.filterEnabled ? '' : ' disabled'}${filterDropActive ? ' drop-target-active' : ''}${filterDropHover ? ' drop-target-hover' : ''}`}
+          className={`filter-section${state.filterEnabled ? '' : ' disabled'}${filterDrop.active ? ' drop-target-active' : ''}${filterDrop.hover ? ' drop-target-hover' : ''}`}
           id={`filter${n}-section`}
           data-drop-target="filter"
           data-osc={`${n}`}
-          onDragOver={onFilterDragOver}
-          onDragLeave={onFilterDragLeave}
-          onDrop={onFilterDrop}
+          onDragOver={filterDrop.onDragOver}
+          onDragLeave={filterDrop.onDragLeave}
+          onDrop={filterDrop.onDrop}
         >
           <div className="controls">
             <div className="control-group">
@@ -259,12 +286,11 @@ export function OscPage({ runtime, active }: { runtime: SynthRuntime | null; act
   const [activeLfoTab, setActiveLfoTab] = useState<[1 | 2 | 3 | 4, 1 | 2 | 3 | 4]>([1, 1]);
   const [lfoState, setLfoState] = useState<[LfoUIState[], LfoUIState[]]>(createInitialLfoSet);
   const [dragSource, setDragSource] = useState<DragSource | null>(null);
-  const [hoverTarget, setHoverTarget] = useState<'volume' | 'filter-1' | 'filter-2' | null>(null);
+  const [hoverTarget, setHoverTarget] = useState<string | null>(null);
 
   const wfPreview1Ref = useRef<ReturnType<typeof createWaveformPreview> | null>(null);
   const wfPreview2Ref = useRef<ReturnType<typeof createWaveformPreview> | null>(null);
   const lfoPreviewRef = useRef(new Map<string, ReturnType<typeof createWaveformPreview>>());
-  const detuneKnobInit = useRef(false);
 
   const setVoicePatch = (index: 0 | 1, patch: Partial<OscUIState>) => {
     setOscState((prev) => {
@@ -347,46 +373,6 @@ export function OscPage({ runtime, active }: { runtime: SynthRuntime | null; act
     }
   }, [lfoState]);
 
-  // Initialize detune knobs once runtime and DOM are ready.
-  useEffect(() => {
-    if (!runtime || detuneKnobInit.current) return;
-    const det1 = document.getElementById('detune1') as HTMLInputElement | null;
-    const det2 = document.getElementById('detune2') as HTMLInputElement | null;
-    const k1c = document.getElementById('detune1-knob') as HTMLCanvasElement | null;
-    const k2c = document.getElementById('detune2-knob') as HTMLCanvasElement | null;
-    if (!det1 || !det2 || !k1c || !k2c) return;
-
-    registerKnob(
-      'detune1',
-      createKnob(k1c, det1, {
-        min: -100,
-        max: 100,
-        step: 1,
-        value: oscState[0].detune,
-        onChange(v) {
-          setVoicePatch(0, { detune: v });
-          runtime.engine.voices[0].setDetune(v);
-        },
-      }),
-    );
-
-    registerKnob(
-      'detune2',
-      createKnob(k2c, det2, {
-        min: -100,
-        max: 100,
-        step: 1,
-        value: oscState[1].detune,
-        onChange(v) {
-          setVoicePatch(1, { detune: v });
-          runtime.engine.voices[1].setDetune(v);
-        },
-      }),
-    );
-
-    detuneKnobInit.current = true;
-  }, [runtime, oscState]);
-
   // Keep runtime in sync after bootstrap becomes available.
   useEffect(() => {
     if (!runtime) return;
@@ -449,6 +435,40 @@ export function OscPage({ runtime, active }: { runtime: SynthRuntime | null; act
   const applyVoice = (index: 0 | 1, updater: (voice: SynthRuntime['engine']['voices'][0]) => void) => {
     if (!runtime) return;
     updater(runtime.engine.voices[index]);
+  };
+
+  const targetKey = (target: LFOTarget, osc: 1 | 2) => (target === 'volume' ? 'volume' : `${target}-${osc}`);
+
+  const isTargetValidForDrag = (target: LFOTarget, osc: 1 | 2) => {
+    if (!dragSource) return false;
+    if (target === 'volume') return true;
+    return dragSource.osc === osc;
+  };
+
+  const dropBinding = (target: LFOTarget, osc: 1 | 2) => {
+    const key = targetKey(target, osc);
+    const active = isTargetValidForDrag(target, osc);
+    const hover = hoverTarget === key;
+
+    return {
+      active,
+      hover,
+      onDragOver: (e: React.DragEvent<HTMLElement>) => {
+        if (!active) return;
+        e.preventDefault();
+        setHoverTarget(key);
+      },
+      onDragLeave: () => {
+        setHoverTarget((prev) => (prev === key ? null : prev));
+      },
+      onDrop: (e: React.DragEvent<HTMLElement>) => {
+        e.preventDefault();
+        if (!dragSource || !active) return;
+        toggleLfoTarget(dragSource.osc, dragSource.lfo, target);
+        setHoverTarget(null);
+        setDragSource(null);
+      },
+    };
   };
 
   const renderLfoSection = (osc: 1 | 2): ReactNode => {
@@ -522,92 +542,82 @@ export function OscPage({ runtime, active }: { runtime: SynthRuntime | null; act
                 </div>
                 <div className="control-group">
                   <label>Rate (Hz)</label>
-                  <input
-                    type="range"
+                  <KnobControl
                     id={`lfo-rate-${osc}-${lfoN}`}
-                    min="0.05"
-                    max="20"
-                    step="0.05"
+                    min={0.05}
+                    max={20}
+                    step={0.05}
                     value={panel.rate}
                     disabled={panel.bpmSync}
-                    onChange={(e) => {
-                      const rate = parseFloat(e.target.value);
+                    displayValue={panel.rate.toFixed(2)}
+                    onValueChange={(rate) => {
                       setLfoPatch(oscIndex as 0 | 1, lfoN - 1, { rate });
                       applyLfo(oscIndex as 0 | 1, lfoN - 1, { rate });
                     }}
                   />
-                  <div className="value-display" id={`lfo-rate-${osc}-${lfoN}-val`}>{panel.rate.toFixed(2)}</div>
                 </div>
                 <div className="control-group">
                   <label>Depth</label>
-                  <input
-                    type="range"
+                  <KnobControl
                     id={`lfo-depth-${osc}-${lfoN}`}
-                    min="0"
-                    max="100"
-                    step="1"
+                    min={0}
+                    max={100}
+                    step={1}
                     value={panel.depthPct}
-                    onChange={(e) => {
-                      const depthPct = parseInt(e.target.value, 10);
+                    displayValue={`${Math.round(panel.depthPct)}%`}
+                    onValueChange={(depthPct) => {
                       setLfoPatch(oscIndex as 0 | 1, lfoN - 1, { depthPct });
                       applyLfo(oscIndex as 0 | 1, lfoN - 1, { depthPct });
                     }}
                   />
-                  <div className="value-display" id={`lfo-depth-${osc}-${lfoN}-val`}>{panel.depthPct}%</div>
                 </div>
               </div>
 
               <div className="controls">
                 <div className="control-group">
                   <label>Phase</label>
-                  <input
-                    type="range"
+                  <KnobControl
                     id={`lfo-phase-${osc}-${lfoN}`}
-                    min="0"
-                    max="360"
-                    step="1"
+                    min={0}
+                    max={360}
+                    step={1}
                     value={panel.phase}
-                    onChange={(e) => {
-                      const phase = parseInt(e.target.value, 10);
+                    displayValue={`${Math.round(panel.phase)}°`}
+                    onValueChange={(phase) => {
                       setLfoPatch(oscIndex as 0 | 1, lfoN - 1, { phase });
                       applyLfo(oscIndex as 0 | 1, lfoN - 1, { phase });
                     }}
                   />
-                  <div className="value-display" id={`lfo-phase-${osc}-${lfoN}-val`}>{panel.phase}°</div>
                 </div>
                 <div className="control-group">
                   <label>Delay (s)</label>
-                  <input
-                    type="range"
+                  <KnobControl
                     id={`lfo-delay-${osc}-${lfoN}`}
-                    min="0"
-                    max="5"
-                    step="0.05"
+                    min={0}
+                    max={5}
+                    step={0.05}
                     value={panel.delay}
-                    onChange={(e) => {
-                      const delay = parseFloat(e.target.value);
+                    displayValue={panel.delay.toFixed(2)}
+                    onValueChange={(delay) => {
                       setLfoPatch(oscIndex as 0 | 1, lfoN - 1, { delay });
                       applyLfo(oscIndex as 0 | 1, lfoN - 1, { delay });
                     }}
                   />
-                  <div className="value-display" id={`lfo-delay-${osc}-${lfoN}-val`}>{panel.delay.toFixed(2)}</div>
                 </div>
                 <div className="control-group">
                   <label>Fade In (s)</label>
-                  <input
-                    type="range"
+                  <KnobControl
                     id={`lfo-fadein-${osc}-${lfoN}`}
-                    min="0"
-                    max="5"
-                    step="0.05"
+                    min={0}
+                    max={5}
+                    step={0.05}
                     value={panel.fadeIn}
-                    onChange={(e) => {
-                      const fadeIn = parseFloat(e.target.value);
+                    displayValue={panel.fadeIn.toFixed(2)}
+                    onValueChange={(fadeIn) => {
                       setLfoPatch(oscIndex as 0 | 1, lfoN - 1, { fadeIn });
                       applyLfo(oscIndex as 0 | 1, lfoN - 1, { fadeIn });
                     }}
                   />
-                  <div className="value-display" id={`lfo-fadein-${osc}-${lfoN}-val`}>{panel.fadeIn.toFixed(2)}</div>
                 </div>
               </div>
 
@@ -666,8 +676,31 @@ export function OscPage({ runtime, active }: { runtime: SynthRuntime | null; act
               </div>
 
               <div className="lfo-targets" id={`lfo-targets-${osc}-${lfoN}`}>
+                {OSC_TARGET_OPTIONS.map(({ target, label }) => (
+                  <button
+                    key={`${osc}-${lfoN}-target-${target}`}
+                    className={`lfo-oneshot-toggle ${panel.targets.includes(target) ? 'on' : 'off'}`}
+                    onClick={() => toggleLfoTarget(osc, lfoN as 1 | 2 | 3 | 4, target)}
+                  >
+                    {label}
+                  </button>
+                ))}
+                <button
+                  className={`lfo-oneshot-toggle ${panel.targets.includes('volume') ? 'on' : 'off'}`}
+                  onClick={() => toggleLfoTarget(osc, lfoN as 1 | 2 | 3 | 4, 'volume')}
+                >
+                  Master Vol
+                </button>
                 {panel.targets.map((target) => {
-                  const label = target === 'filter' ? `Filter ${osc}` : 'Master Vol';
+                  const labelMap: Record<LFOTarget, string> = {
+                    filter: `Filter ${osc}`,
+                    volume: 'Master Vol',
+                    'osc-volume': `Osc ${osc} Vol`,
+                    'osc-detune': `Osc ${osc} Detune`,
+                    'osc-unison-detune': `Osc ${osc} UniDet`,
+                    'osc-unison-spread': `Osc ${osc} Spread`,
+                  };
+                  const label = labelMap[target];
                   return (
                     <span key={`${osc}-${lfoN}-${target}`} className="lfo-target-badge">
                       {label}{' '}
@@ -684,6 +717,8 @@ export function OscPage({ runtime, active }: { runtime: SynthRuntime | null; act
       </div>
     );
   };
+
+  const masterVolumeDrop = dropBinding('volume', 1);
 
   return (
     <div className={`main-page${active ? ' active' : ''}`} id="page-osc">
@@ -728,23 +763,7 @@ export function OscPage({ runtime, active }: { runtime: SynthRuntime | null; act
           state={oscState[0]}
           hidden={activeOsc !== 1}
           lfoSection={renderLfoSection(1)}
-          filterDropActive={dragSource?.osc === 1}
-          filterDropHover={hoverTarget === 'filter-1'}
-          onFilterDragOver={(e) => {
-            if (dragSource?.osc !== 1) return;
-            e.preventDefault();
-            setHoverTarget('filter-1');
-          }}
-          onFilterDragLeave={() => {
-            setHoverTarget((prev) => (prev === 'filter-1' ? null : prev));
-          }}
-          onFilterDrop={(e) => {
-            e.preventDefault();
-            if (!dragSource || dragSource.osc !== 1) return;
-            toggleLfoTarget(1, dragSource.lfo, 'filter');
-            setHoverTarget(null);
-            setDragSource(null);
-          }}
+          dropForTarget={(target) => dropBinding(target, 1)}
           onWaveform={(value) => {
             setVoicePatch(0, { waveform: value });
             applyVoice(0, (v) => v.setWaveform(value));
@@ -785,23 +804,7 @@ export function OscPage({ runtime, active }: { runtime: SynthRuntime | null; act
           state={oscState[1]}
           hidden={activeOsc !== 2}
           lfoSection={renderLfoSection(2)}
-          filterDropActive={dragSource?.osc === 2}
-          filterDropHover={hoverTarget === 'filter-2'}
-          onFilterDragOver={(e) => {
-            if (dragSource?.osc !== 2) return;
-            e.preventDefault();
-            setHoverTarget('filter-2');
-          }}
-          onFilterDragLeave={() => {
-            setHoverTarget((prev) => (prev === 'filter-2' ? null : prev));
-          }}
-          onFilterDrop={(e) => {
-            e.preventDefault();
-            if (!dragSource || dragSource.osc !== 2) return;
-            toggleLfoTarget(2, dragSource.lfo, 'filter');
-            setHoverTarget(null);
-            setDragSource(null);
-          }}
+          dropForTarget={(target) => dropBinding(target, 2)}
           onWaveform={(value) => {
             setVoicePatch(1, { waveform: value });
             applyVoice(1, (v) => v.setWaveform(value));
@@ -838,43 +841,29 @@ export function OscPage({ runtime, active }: { runtime: SynthRuntime | null; act
         />
 
         <div
-          className={`controls master-controls${dragSource ? ' drop-target-active' : ''}${hoverTarget === 'volume' ? ' drop-target-hover' : ''}`}
+          className={`controls master-controls${masterVolumeDrop.active ? ' drop-target-active' : ''}${masterVolumeDrop.hover ? ' drop-target-hover' : ''}`}
           id="master-volume-section"
           data-drop-target="volume"
-          onDragOver={(e) => {
-            if (!dragSource) return;
-            e.preventDefault();
-            setHoverTarget('volume');
-          }}
-          onDragLeave={() => {
-            setHoverTarget((prev) => (prev === 'volume' ? null : prev));
-          }}
-          onDrop={(e) => {
-            e.preventDefault();
-            if (!dragSource) return;
-            toggleLfoTarget(dragSource.osc, dragSource.lfo, 'volume');
-            setHoverTarget(null);
-            setDragSource(null);
-          }}
+          onDragOver={masterVolumeDrop.onDragOver}
+          onDragLeave={masterVolumeDrop.onDragLeave}
+          onDrop={masterVolumeDrop.onDrop}
         >
           <div className="control-group">
             <label>Master Volume</label>
-            <input
-              type="range"
+            <KnobControl
               id="master-volume"
-              min="0"
-              max="1"
-              step="0.01"
+              min={0}
+              max={1}
+              step={0.01}
               value={masterVolume}
-              onChange={(e) => {
-                const value = parseFloat(e.target.value);
+              displayValue={masterVolume.toFixed(2)}
+              onValueChange={(value) => {
                 setMasterVolume(value);
                 if (!runtime) return;
                 runtime.state.baseMasterVolume = value;
                 runtime.engine.setMasterVolume(value);
               }}
             />
-            <div className="value-display" id="master-volume-val">{masterVolume.toFixed(2)}</div>
           </div>
         </div>
       </div>

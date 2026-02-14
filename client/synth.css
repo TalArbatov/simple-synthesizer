@@ -662,3 +662,74 @@ select:focus {
   color: #333;
   padding: 8px 20px 14px;
 }
+
+/* ── Start page ── */
+.start-page {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+}
+
+.start-window {
+  background: #1a1a1f;
+  border-radius: 12px;
+  padding: 40px 36px 36px;
+  box-shadow: 0 4px 40px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.04);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 28px;
+  min-width: 380px;
+}
+
+.start-window-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #c8ccd0;
+  letter-spacing: 0.5px;
+}
+
+.start-input-row {
+  display: flex;
+  gap: 10px;
+  width: 100%;
+}
+
+.start-input {
+  flex: 1;
+  background: #111114;
+  border: 1px solid #2a2a34;
+  border-radius: 6px;
+  padding: 10px 14px;
+  color: #c8ccd0;
+  font-family: inherit;
+  font-size: 0.9rem;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.start-input::placeholder {
+  color: #555;
+}
+
+.start-input:focus {
+  border-color: #00d2ff;
+}
+
+.start-button {
+  background: #00d2ff;
+  color: #111114;
+  border: none;
+  border-radius: 6px;
+  padding: 10px 24px;
+  font-family: inherit;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.start-button:hover {
+  background: #33ddff;
+}

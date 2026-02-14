@@ -1,6 +1,12 @@
 export type LFOWaveform = 'sine' | 'triangle' | 'square' | 'sawtooth';
 export type LFODivision = '1/1' | '1/2' | '1/4' | '1/8' | '1/16';
-export type LFOTarget = 'filter' | 'volume';
+export type LFOTarget =
+  | 'filter'
+  | 'volume'
+  | 'osc-volume'
+  | 'osc-detune'
+  | 'osc-unison-detune'
+  | 'osc-unison-spread';
 
 export class LFO {
   waveform: LFOWaveform;

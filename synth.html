@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Synthesizer</title>
+<link rel="stylesheet" href="synth.css">
+</head>
+<body>
+
+<div id="synth">
+  <h1>Dual Osc Synth</h1>
+
+  <canvas id="waveform-canvas" width="696" height="80"></canvas>
+
+  <div class="osc-section" id="osc1-section">
+    <div class="section-label">Osc 1</div>
+    <button class="osc-toggle on" id="toggle1">ON</button>
+    <div class="osc-content">
+      <div class="controls">
+        <div class="control-group">
+          <label>Waveform</label>
+          <select id="waveform1">
+            <option value="sine">Sine</option>
+            <option value="triangle">Triangle</option>
+            <option value="sawtooth" selected>Sawtooth</option>
+            <option value="square">Square</option>
+          </select>
+        </div>
+        <div class="control-group">
+          <label>Volume</label>
+          <input type="range" id="volume1" min="0" max="1" step="0.01" value="0.5">
+          <div class="value-display" id="volume1-val">0.50</div>
+        </div>
+        <div class="control-group">
+          <label>Detune (cents)</label>
+          <input type="range" id="detune1" min="-100" max="100" step="1" value="0">
+          <div class="value-display" id="detune1-val">0</div>
+        </div>
+      </div>
+      <canvas class="adsr-canvas" id="adsr1-canvas" width="560" height="120"></canvas>
+      <div class="adsr-values" id="adsr1-values"></div>
+    </div>
+  </div>
+
+  <div class="osc-section" id="osc2-section">
+    <div class="section-label">Osc 2</div>
+    <button class="osc-toggle on" id="toggle2">ON</button>
+    <div class="osc-content">
+      <div class="controls">
+        <div class="control-group">
+          <label>Waveform</label>
+          <select id="waveform2">
+            <option value="sine">Sine</option>
+            <option value="triangle" selected>Triangle</option>
+            <option value="sawtooth">Sawtooth</option>
+            <option value="square">Square</option>
+          </select>
+        </div>
+        <div class="control-group">
+          <label>Volume</label>
+          <input type="range" id="volume2" min="0" max="1" step="0.01" value="0.5">
+          <div class="value-display" id="volume2-val">0.50</div>
+        </div>
+        <div class="control-group">
+          <label>Detune (cents)</label>
+          <input type="range" id="detune2" min="-100" max="100" step="1" value="0">
+          <div class="value-display" id="detune2-val">0</div>
+        </div>
+      </div>
+      <canvas class="adsr-canvas" id="adsr2-canvas" width="560" height="120"></canvas>
+      <div class="adsr-values" id="adsr2-values"></div>
+    </div>
+  </div>
+
+  <div class="controls master-controls">
+    <div class="control-group">
+      <label>Master Volume</label>
+      <input type="range" id="master-volume" min="0" max="1" step="0.01" value="0.7">
+      <div class="value-display" id="master-volume-val">0.70</div>
+    </div>
+  </div>
+
+  <canvas id="keyboard" width="696" height="140"></canvas>
+  <div class="hint">Click keys or use keyboard: A-K (white) &amp; W-U (black) | Drag ADSR handles to shape envelope</div>
+</div>
+
+<script type="module" src="js/main.js"></script>
+</body>
+</html>

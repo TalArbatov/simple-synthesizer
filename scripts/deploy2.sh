@@ -10,5 +10,5 @@ echo $REPO_ROOT
 npm --prefix "${REPO_ROOT}/client" run build
 npm --prefix "${REPO_ROOT}/server" run build
 
-docker build --platform=linux/amd64 -t talarbatov/synth "${REPO_ROOT}"
-docker push talarbatov/synth:latest
+docker build --platform=linux/amd64 -t talarbatov/psynth-app "${REPO_ROOT}"
+docker push talarbatov/psynth-app:latest
